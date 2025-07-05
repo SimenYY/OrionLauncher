@@ -1,0 +1,13 @@
+[project]
+name = "orionlauncher"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "minecraft-launcher-lib>=7.1",
+    "pyside6>=6.9.1",
+]
+
+[tool.uv]
+index-url = "https://mirrors.163.com/pypi/simple/"
