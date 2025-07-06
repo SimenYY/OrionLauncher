@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QPixmap, QCloseEvent
 
-from Utils.file import get_base_path
+from Core.Repository.Path import path
 from Controller import GameController, AccountController, SettingsController
 from .home_page import HomePage
 from .installations_page import InstallationsPage
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
     def _set_background(self):
         """设置背景图片"""
         # 获取背景图片路径
-        bg_path = os.path.join(get_base_path(), "src", "image", "background.png")
+        bg_path = os.path.join(path.get("base_path"), "src", "image", "background.png")
         bg_path = bg_path.replace("\\", "/")  # 转换路径分隔符
         
         if os.path.exists(bg_path):
