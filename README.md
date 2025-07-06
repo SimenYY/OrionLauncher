@@ -16,6 +16,8 @@
 
 我们欢迎并感谢任何形式的贡献！在加入社区前，请查看 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) 了解我们的社区准则。
 
+开发文档（暂定）：<https://orion.eh.cx/>
+
 ## 开源协议
 
 本项目采用 GNU-LGPL-2.1 协议开源。
