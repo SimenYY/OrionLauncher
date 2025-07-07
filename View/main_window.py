@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QPixmap, QCloseEvent
 
-from Core.Repository.Path import path
+from Core.Repository import path
 from Controller import GameController, AccountController, SettingsController
 from .home_page import HomePage
 from .installations_page import InstallationsPage
