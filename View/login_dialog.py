@@ -63,7 +63,7 @@ class LoginDialog(QDialog):
         
         # 创建标题
         title_label = QLabel("登录您的账户")
-        title_label.setStyleSheet("color: #4CAF50; font-size: 20px; font-weight: bold;")
+        title_label.setStyleSheet("color: #4CAF50; font-size: 20px; font-weight: bold; background: transparent;")
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(title_label)
         
@@ -79,7 +79,7 @@ class LoginDialog(QDialog):
         
         # 用户名输入
         username_label = QLabel("用户名:")
-        username_label.setStyleSheet("color: #BBBBBB; font-size: 14px;")
+        username_label.setStyleSheet("color: #BBBBBB; font-size: 14px; background: transparent;")
         self.username_edit = QLineEdit()
         self.username_edit.setStyleSheet("""
             QLineEdit {
@@ -99,7 +99,7 @@ class LoginDialog(QDialog):
         
         # 密码输入
         password_label = QLabel("密码:")
-        password_label.setStyleSheet("color: #BBBBBB; font-size: 14px;")
+        password_label.setStyleSheet("color: #BBBBBB; font-size: 14px; background: transparent;")
         self.password_edit = QLineEdit()
         self.password_edit.setStyleSheet("""
             QLineEdit {
@@ -123,7 +123,7 @@ class LoginDialog(QDialog):
         
         # 创建错误信息标签（默认隐藏）
         self.error_label = QLabel()
-        self.error_label.setStyleSheet("color: #FF5555; font-size: 14px;")
+        self.error_label.setStyleSheet("color: #FF5555; font-size: 14px; background: transparent;")
         self.error_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.error_label.setVisible(False)
         main_layout.addWidget(self.error_label)

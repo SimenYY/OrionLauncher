@@ -46,6 +46,12 @@ def main():
             color: #EEEEEE;
             font-family: "Microsoft YaHei", "SimHei", sans-serif;
         }
+        QLabel {
+            background: transparent;
+        }
+        QCheckBox {
+            background: transparent;
+        }
     """)
     
     # 创建主窗口

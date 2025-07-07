@@ -56,7 +56,7 @@ class InstallationsPage(QWidget):
         
         # 创建标题
         title_label = QLabel("安装管理")
-        title_label.setStyleSheet("color: white; font-size: 24px; font-weight: bold;")
+        title_label.setStyleSheet("color: white; font-size: 24px; font-weight: bold; background: transparent;")
         main_layout.addWidget(title_label)
         
         # 创建已安装版本列表
@@ -72,7 +72,7 @@ class InstallationsPage(QWidget):
         
         # 创建已安装版本标题
         installed_title = QLabel("已安装版本")
-        installed_title.setStyleSheet("color: #4CAF50; font-size: 18px; font-weight: bold;")
+        installed_title.setStyleSheet("color: #4CAF50; font-size: 18px; font-weight: bold; background: transparent;")
         installed_layout.addWidget(installed_title)
         
         # 创建已安装版本列表
@@ -164,13 +164,13 @@ class InstallationsPage(QWidget):
         
         # 创建安装新版本标题
         install_title = QLabel("安装新版本")
-        install_title.setStyleSheet("color: #4CAF50; font-size: 18px; font-weight: bold;")
+        install_title.setStyleSheet("color: #4CAF50; font-size: 18px; font-weight: bold; background: transparent;")
         install_layout.addWidget(install_title)
         
         # 创建版本选择区域
         version_layout = QHBoxLayout()
         version_label = QLabel("选择版本:")
-        version_label.setStyleSheet("color: #BBBBBB; font-size: 14px;")
+        version_label.setStyleSheet("color: #BBBBBB; font-size: 14px; background: transparent;")
         self.version_combo = QComboBox()
         self.version_combo.setStyleSheet("""
             QComboBox {
