@@ -46,7 +46,7 @@ class ProgressDialog(QDialog):
         
         # 创建任务标签
         self.task_label = QLabel("正在处理...")
-        self.task_label.setStyleSheet("color: white; font-size: 16px;")
+        self.task_label.setStyleSheet("color: white; font-size: 16px; background: transparent;")
         main_layout.addWidget(self.task_label)
         
         # 创建进度条
@@ -70,7 +70,7 @@ class ProgressDialog(QDialog):
         
         # 创建详细信息标签
         self.detail_label = QLabel()
-        self.detail_label.setStyleSheet("color: #BBBBBB; font-size: 12px;")
+        self.detail_label.setStyleSheet("color: #BBBBBB; font-size: 12px; background: transparent;")
         self.detail_label.setWordWrap(True)
         main_layout.addWidget(self.detail_label)
         

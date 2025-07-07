@@ -52,7 +52,7 @@ class SettingsPage(QWidget):
         
         # 创建标题
         title_label = QLabel("设置")
-        title_label.setStyleSheet("color: white; font-size: 24px; font-weight: bold;")
+        title_label.setStyleSheet("color: white; font-size: 24px; font-weight: bold; background: transparent;")
         main_layout.addWidget(title_label)
         
         # 创建选项卡
@@ -299,6 +299,7 @@ class SettingsPage(QWidget):
         self.fullscreen_check.setStyleSheet("""
             QCheckBox {
                 color: white;
+                background: transparent;
             }
             QCheckBox::indicator {
                 width: 16px;
@@ -388,6 +389,9 @@ class SettingsPage(QWidget):
         # 检查更新
         self.check_updates_check = QCheckBox()
         self.check_updates_check.setStyleSheet("""
+            QCheckBox {
+                background: transparent;
+            }
             QCheckBox::indicator {
                 width: 16px;
                 height: 16px;
@@ -405,6 +409,9 @@ class SettingsPage(QWidget):
         # 游戏启动时关闭启动器
         self.close_launcher_check = QCheckBox()
         self.close_launcher_check.setStyleSheet("""
+            QCheckBox {
+                background: transparent;
+            }
             QCheckBox::indicator {
                 width: 16px;
                 height: 16px;
@@ -492,6 +499,9 @@ class SettingsPage(QWidget):
         # 下载资源
         self.download_assets_check = QCheckBox()
         self.download_assets_check.setStyleSheet("""
+            QCheckBox {
+                background: transparent;
+            }
             QCheckBox::indicator {
                 width: 16px;
                 height: 16px;
@@ -509,6 +519,9 @@ class SettingsPage(QWidget):
         # 下载库文件
         self.download_libraries_check = QCheckBox()
         self.download_libraries_check.setStyleSheet("""
+            QCheckBox {
+                background: transparent;
+            }
             QCheckBox::indicator {
                 width: 16px;
                 height: 16px;
