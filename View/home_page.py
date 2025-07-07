@@ -10,8 +10,7 @@ from PySide6.QtWidgets import (
     QLabel, QComboBox, QFrame, QSpacerItem, 
     QSizePolicy, QProgressBar
 )
-from PySide6.QtCore import Qt, Signal, Slot, QSize
-from PySide6.QtGui import QIcon, QPixmap, QFont
+from PySide6.QtCore import Qt, Slot
 
 from Controller import GameController, AccountController
 

@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QLocale, QTranslator
 
 from View import MainWindow
-from Core.Repository.Path import path
+from Core.Repository import path
 
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     path.set("base_path", sys._MEIPASS)
