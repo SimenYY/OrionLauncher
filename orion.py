@@ -7,6 +7,7 @@ Orion Launcher - Minecraft 启动器
 
 import sys
 import os
+import logging
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QLocale, QTranslator
 
@@ -24,7 +25,9 @@ path.set("exe_path", os.path.dirname(os.path.abspath(sys.argv[0])))
 # 当前工作目录
 path.set("cwd_path", os.getcwd())
 
-
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 def main():
     """主程序入口"""
