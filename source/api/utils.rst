@@ -11,6 +11,14 @@ Utils 模块
    :undoc-members:
    :show-inheritance:
 
+通用工具
+--------
+
+.. automodule:: Utils.tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 UUID 工具
 ----------
 

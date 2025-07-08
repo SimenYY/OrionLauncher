@@ -4,7 +4,7 @@
 """
 
 from typing import Dict, List, Optional, Any
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtCore import Signal, Slot, QObject
 
 from .base_controller import BaseController
 

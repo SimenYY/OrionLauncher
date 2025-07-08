@@ -22,6 +22,7 @@ Example:
 """
 from typing import Callable, Dict, List, Union, Any, Optional
 from Utils.request import request_json
+from Utils.tools import empty
 from Core.Repository import config, persistence
 
 import time
@@ -41,8 +42,8 @@ class VersionRequestOfficial:
         self.host: str = "https://launchermeta.mojang.com"
         self.path: str = "/mc/game/version_manifest.json"
     
-    async def request(self, finnished: Optional[Callable[[Dict[str, Any]], None]] = None, 
-                     error: Optional[Callable[[str], None]] = None) -> Union[Dict[str, Any], List[Any], None]:
+    async def request(self, finnished: Optional[Callable[[Dict[str, Any]], None]] = empty, 
+                     error: Optional[Callable[[str], None]] = empty) -> Union[Dict[str, Any], List[Any], None]:
         """发送版本清单请求。
         
         Args:
@@ -121,8 +122,8 @@ class MinecraftVersion:
         for version in self.source["versions"]:
             self.versions[version["id"]] = version
 
-async def load_versions(finnished: Optional[Callable[[Dict[str, Any]], None]] = None, 
-                       error: Optional[Callable[[str], None]] = None) -> MinecraftVersion:
+async def load_versions(finnished: Optional[Callable[[Dict[str, Any]], None]] = empty, 
+                       error: Optional[Callable[[str], None]] = empty) -> MinecraftVersion:
     """加载Minecraft版本信息。
     
     从配置的镜像源获取最新的版本清单数据，解析后存储到持久化缓存中。
@@ -152,8 +153,8 @@ async def load_versions(finnished: Optional[Callable[[Dict[str, Any]], None]] = 
     return version_manifest
 
 async def get_versions(types: List[str] = None, 
-                      finnished: Optional[Callable[[Dict[str, Any]], None]] = None, 
-                      error: Optional[Callable[[str], None]] = None) -> Dict[str, Union[str, Dict[str, Dict[str, Union[str, int]]]]]:
+                      finnished: Optional[Callable[[Dict[str, Any]], None]] = empty, 
+                      error: Optional[Callable[[str], None]] = empty) -> Dict[str, Union[str, Dict[str, Dict[str, Union[str, int]]]]]:
     """获取指定类型的Minecraft版本信息。
     
     根据指定的版本类型过滤版本列表，支持缓存机制以提高性能。

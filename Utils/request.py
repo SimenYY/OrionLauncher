@@ -2,13 +2,14 @@ from typing import Callable
 import httpx
 
 from Utils.Exceptions import *
+from Utils.tools import empty
 
 async def request_json(
         url: str,
         method: str = "GET",
         headers: dict = {},
-        finnished: Callable = None,
-        error: Callable = None,
+        finnished: Callable = empty,
+        error: Callable = empty,
 ) -> dict|list|None:
     """
     发送请求并返回 JSON 数据
