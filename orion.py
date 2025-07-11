@@ -5,21 +5,24 @@ Orion Launcher - Minecraft 启动器
 主程序入口
 """
 
-import sys
-import os
 import logging
-from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QLocale, QTranslator
+import os
+import sys
 
-from View import MainWindow
+from PySide6.QtCore import QLocale, QTranslator
+from PySide6.QtWidgets import QApplication
+
 from Core.Repository import path
+from View import MainWindow
 
 # 随 Nuitka/Pyinstaller 静态打包进可执行文件的资源文件释放的临时目录
-if getattr(sys, 'frozen', False):
-    if hasattr(sys, '_MEIPASS'):
-        path.set("base_path", sys._MEIPASS)     # Pyinstaller 单文件打包
+if getattr(sys, "frozen", False):
+    if hasattr(sys, "_MEIPASS"):
+        path.set("base_path", sys._MEIPASS)  # Pyinstaller 单文件打包
 else:
-    path.set("base_path", os.path.dirname(os.path.abspath(__file__))) # 非打包 & Nuitka单文件打包
+    path.set(
+        "base_path", os.path.dirname(os.path.abspath(__file__))
+    )  # 非打包 & Nuitka单文件打包
 # 可执行文件在计算机中的固定目录
 path.set("exe_path", os.path.dirname(os.path.abspath(sys.argv[0])))
 # 当前工作目录
@@ -27,7 +30,8 @@ path.set("cwd_path", os.getcwd())
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
 
 def main():
     """主程序入口"""
@@ -35,15 +39,18 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Orion Launcher")
     app.setApplicationDisplayName("Orion Launcher")
-    
+
     # 设置中文本地化
     locale = QLocale(QLocale.Chinese, QLocale.China)
     translator = QTranslator()
-    if translator.load(locale, "orion", "_", os.path.join(os.path.dirname(__file__), "translations")):
+    if translator.load(
+        locale, "orion", "_", os.path.join(os.path.dirname(__file__), "translations")
+    ):
         app.installTranslator(translator)
-    
+
     # 设置样式表
-    app.setStyleSheet("""
+    app.setStyleSheet(
+        """
         QWidget {
             background-color: #2E2E2E;
             color: #EEEEEE;
@@ -55,12 +62,13 @@ def main():
         QCheckBox {
             background: transparent;
         }
-    """)
-    
+    """
+    )
+
     # 创建主窗口
     window = MainWindow()
     window.show()
-    
+
     # 运行应用程序
     sys.exit(app.exec())
 

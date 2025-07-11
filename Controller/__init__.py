@@ -10,9 +10,9 @@ from .account_controller import AccountController
 from .settings_controller import SettingsController
 
 __all__ = [
-    'BaseController',
-    'AsyncTaskWorker',
-    'GameController',
-    'AccountController',
-    'SettingsController',
-] 
+    "BaseController",
+    "AsyncTaskWorker",
+    "GameController",
+    "AccountController",
+    "SettingsController",
+]

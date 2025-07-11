@@ -21,20 +21,15 @@ Variables:
     mirror: 镜像源映射字典
 """
 
-from .minecraft_version import (
-    VersionRequestOfficial,
-    VersionRequestBMCLAPI,
-    MinecraftVersion,
-    load_versions,
-    get_versions,
-    mirror
-)
+from .minecraft_version import (MinecraftVersion, VersionRequestBMCLAPI,
+                                VersionRequestOfficial, get_versions,
+                                load_versions, mirror)
 
 __all__ = [
-    'VersionRequestOfficial',
-    'VersionRequestBMCLAPI', 
-    'MinecraftVersion',
-    'load_versions',
-    'get_versions',
-    'mirror'
-] 
+    "VersionRequestOfficial",
+    "VersionRequestBMCLAPI",
+    "MinecraftVersion",
+    "load_versions",
+    "get_versions",
+    "mirror",
+]

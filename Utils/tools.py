@@ -15,28 +15,29 @@ import traceback
 
 logger = logging.getLogger(__name__)
 
+
 def empty(*args, **kwargs) -> None:
     """
     空回调函数，接受任意参数但不执行任何操作。
-    
+
     这是一个通用的空操作函数，通常用作默认回调函数。在DEBUG日志级别下，
     会记录调用此函数的详细信息，帮助开发者了解何时何地使用了默认回调。
-    
+
     Args:
         *args: 任意位置参数，将被忽略
         **kwargs: 任意关键字参数，将被忽略
-        
+
     Returns:
         None: 总是返回 None
-        
+
     Example:
         >>> # 作为默认回调使用
         >>> callback = empty
         >>> callback("some", "args", key="value")  # 不会有任何输出
-        
+
         >>> # 在需要回调但不想执行任何操作时使用
         >>> process_data(data, on_complete=empty)
-        
+
     Note:
         在DEBUG日志级别下，此函数会记录调用堆栈信息。
         在生产环境中，为了性能考虑，建议将日志级别设置为INFO或更高。
@@ -48,5 +49,5 @@ def empty(*args, **kwargs) -> None:
         logger.debug(
             f"Default callback 'empty' was called by {caller.name} in {caller.filename}:{caller.lineno}:\n"
             f"    with {caller.line}"
-            )
+        )
     return None
