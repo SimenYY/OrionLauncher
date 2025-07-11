@@ -7,10 +7,20 @@
 from typing import Any, Dict, List
 
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import (QComboBox, QFrame, QHBoxLayout, QLabel,
-                               QProgressBar, QPushButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from Controller import AccountController, GameController
+
+from .theme_manager import ThemeManager
 
 
 class HomePage(QWidget):
@@ -61,11 +71,11 @@ class HomePage(QWidget):
         # 创建顶部区域
         top_frame = QFrame()
         top_frame.setStyleSheet(
-            """
-            QFrame {
-                background-color: rgba(51, 51, 51, 150);
+            f"""
+            QFrame {{
+                background-color: {ThemeManager().get("home-window-background")};
                 border-radius: 8px;
-            }
+            }}
         """
         )
         top_layout = QVBoxLayout(top_frame)
@@ -74,14 +84,14 @@ class HomePage(QWidget):
         # 创建标题
         title_label = QLabel("Orion's Tip of the Day")
         title_label.setStyleSheet(
-            "color: #4CAF50; font-size: 18px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
         )
         top_layout.addWidget(title_label)
 
         # 创建提示内容
         tip_label = QLabel("Getting a fresh tip for you...")
         tip_label.setStyleSheet(
-            "color: #BBBBBB; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
         tip_label.setWordWrap(True)
         top_layout.addWidget(tip_label)
@@ -95,11 +105,11 @@ class HomePage(QWidget):
         # 创建底部控制区域
         bottom_frame = QFrame()
         bottom_frame.setStyleSheet(
-            """
-            QFrame {
-                background-color: rgba(51, 51, 51, 150);
+            f"""
+            QFrame {{
+                background-color: {ThemeManager().get("home-window-background")};
                 border-radius: 8px;
-            }
+            }}
         """
         )
         bottom_layout = QVBoxLayout(bottom_frame)
@@ -110,29 +120,29 @@ class HomePage(QWidget):
         version_layout = QHBoxLayout()
         version_label = QLabel("游戏版本:")
         version_label.setStyleSheet(
-            "color: #BBBBBB; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
         self.version_combo = QComboBox()
         self.version_combo.setStyleSheet(
-            """
-            QComboBox {
-                background-color: rgba(68, 68, 68, 150);
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QComboBox {{
+                background-color: {ThemeManager().get("text-box-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
                 min-width: 200px;
-            }
-            QComboBox::drop-down {
+            }}
+            QComboBox::drop-down {{
                 border: none;
                 width: 20px;
-            }
-            QComboBox QAbstractItemView {
-                background-color: rgba(68, 68, 68, 200);
-                color: white;
-                border: 1px solid #555555;
-                selection-background-color: #4CAF50;
-            }
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {ThemeManager().get("text-box-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
+                selection-background-color: {ThemeManager().get("selection-background")};
+            }}
         """
         )
 
@@ -143,7 +153,7 @@ class HomePage(QWidget):
         # 创建版本信息标签
         self.version_info = QLabel("Latest Release - 1.21")
         self.version_info.setStyleSheet(
-            "color: #BBBBBB; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
         version_layout.addWidget(self.version_info)
 
@@ -152,22 +162,22 @@ class HomePage(QWidget):
         # 创建启动按钮
         self.play_button = QPushButton("PLAY")
         self.play_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 15px;
                 font-size: 18px;
                 font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:disabled {
-                background-color: rgba(85, 85, 85, 150);
-                color: #888888;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("selection-hover")};
+            }}
+            QPushButton:disabled {{
+                background-color: {ThemeManager().get("disabled-selection")};
+                color: {ThemeManager().get("disabled-selection-text")};
+            }}
         """
         )
         self.play_button.setMinimumHeight(50)
@@ -176,17 +186,17 @@ class HomePage(QWidget):
         # 创建进度条（默认隐藏）
         self.progress_bar = QProgressBar()
         self.progress_bar.setStyleSheet(
-            """
-            QProgressBar {
-                background-color: rgba(68, 68, 68, 150);
-                color: white;
+            f"""
+            QProgressBar {{
+                background-color: {ThemeManager().get("progress-bar-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 text-align: center;
-            }
-            QProgressBar::chunk {
-                background-color: #4CAF50;
+            }}
+            QProgressBar::chunk {{
+                background-color: {ThemeManager().get("progress-bar")};
                 border-radius: 4px;
-            }
+            }}
         """
         )
         self.progress_bar.setMinimumHeight(50)

@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Slot
 
 from Controller import SettingsController
+from .theme_manager import ThemeManager
 
 
 class SettingsPage(QWidget):
@@ -61,35 +62,35 @@ class SettingsPage(QWidget):
         # 创建标题
         title_label = QLabel("设置")
         title_label.setStyleSheet(
-            "color: white; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("text")}; font-size: 24px; font-weight: bold; background: transparent;"
         )
         main_layout.addWidget(title_label)
 
         # 创建选项卡
         self.tab_widget = QTabWidget()
         self.tab_widget.setStyleSheet(
-            """
-            QTabWidget::pane {
-                border: 1px solid #555555;
-                background-color: #333333;
+            f"""
+            QTabWidget::pane {{
+                border: 1px solid {ThemeManager().get("border")};
+                background-color: {ThemeManager().get("tab-selection-background")};
                 border-radius: 4px;
-            }
-            QTabBar::tab {
-                background-color: #444444;
-                color: #BBBBBB;
+            }}
+            QTabBar::tab {{
+                background-color: {ThemeManager().get("tab-background")};
+                color: {ThemeManager().get("label")};
                 padding: 8px 16px;
                 margin-right: 2px;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
-            }
-            QTabBar::tab:selected {
-                background-color: #333333;
-                color: #4CAF50;
-                border-bottom: 2px solid #4CAF50;
-            }
-            QTabBar::tab:hover:!selected {
-                background-color: #555555;
-            }
+            }}
+            QTabBar::tab:selected {{
+                background-color: {ThemeManager().get("tab-selection-background")};
+                color: {ThemeManager().get("selection-background")};
+                border-bottom: 2px solid {ThemeManager().get("focus-border")};
+            }}
+            QTabBar::tab:hover:!selected {{
+                background-color: {ThemeManager().get("neutral-selection-background")};
+            }}
         """
         )
 
@@ -117,17 +118,17 @@ class SettingsPage(QWidget):
         # 创建保存按钮
         self.save_button = QPushButton("保存")
         self.save_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px 16px;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("selection-hover")};
+            }}
         """
         )
         button_layout.addWidget(self.save_button)
@@ -149,19 +150,19 @@ class SettingsPage(QWidget):
         # 创建游戏路径设置
         path_group = QGroupBox("游戏路径")
         path_group.setStyleSheet(
-            """
-            QGroupBox {
-                border: 1px solid #555555;
+            f"""
+            QGroupBox {{
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
                 padding-top: 10px;
-            }
-            QGroupBox::title {
-                color: #4CAF50;
+            }}
+            QGroupBox::title {{
+                color: {ThemeManager().get("title")};
                 subcontrol-origin: margin;
                 left: 10px;
                 padding: 0 5px;
-            }
+            }}
         """
         )
         path_layout = QFormLayout(path_group)
@@ -171,28 +172,28 @@ class SettingsPage(QWidget):
         minecraft_layout = QHBoxLayout()
         self.minecraft_dir_edit = QLineEdit()
         self.minecraft_dir_edit.setStyleSheet(
-            """
-            QLineEdit {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QLineEdit {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.minecraft_dir_button = QPushButton("浏览...")
         self.minecraft_dir_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #555555;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("neutral-selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px;
-            }
-            QPushButton:hover {
-                background-color: #666666;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("neutral-selection-hover")};
+            }}
         """
         )
         minecraft_layout.addWidget(self.minecraft_dir_edit)
@@ -203,28 +204,28 @@ class SettingsPage(QWidget):
         java_layout = QHBoxLayout()
         self.java_path_edit = QLineEdit()
         self.java_path_edit.setStyleSheet(
-            """
-            QLineEdit {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QLineEdit {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.java_path_button = QPushButton("浏览...")
         self.java_path_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #555555;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("neutral-selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px;
-            }
-            QPushButton:hover {
-                background-color: #666666;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("neutral-selection-hover")};
+            }}
         """
         )
         java_layout.addWidget(self.java_path_edit)
@@ -236,19 +237,19 @@ class SettingsPage(QWidget):
         # 创建游戏设置
         game_group = QGroupBox("游戏设置")
         game_group.setStyleSheet(
-            """
-            QGroupBox {
-                border: 1px solid #555555;
+            f"""
+            QGroupBox {{
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
                 padding-top: 10px;
-            }
-            QGroupBox::title {
-                color: #4CAF50;
+            }}
+            QGroupBox::title {{
+                color: {ThemeManager().get("title")};
                 subcontrol-origin: margin;
                 left: 10px;
                 padding: 0 5px;
-            }
+            }}
         """
         )
         game_layout = QFormLayout(game_group)
@@ -257,14 +258,14 @@ class SettingsPage(QWidget):
         # 最大内存
         self.max_memory_spin = QSpinBox()
         self.max_memory_spin.setStyleSheet(
-            """
-            QSpinBox {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QSpinBox {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.max_memory_spin.setMinimum(1024)
@@ -277,14 +278,14 @@ class SettingsPage(QWidget):
         # JVM 参数
         self.jvm_args_edit = QLineEdit()
         self.jvm_args_edit.setStyleSheet(
-            """
-            QLineEdit {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QLineEdit {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         game_layout.addRow("JVM 参数:", self.jvm_args_edit)
@@ -293,14 +294,14 @@ class SettingsPage(QWidget):
         resolution_layout = QHBoxLayout()
         self.width_spin = QSpinBox()
         self.width_spin.setStyleSheet(
-            """
-            QSpinBox {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QSpinBox {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.width_spin.setMinimum(640)
@@ -313,14 +314,14 @@ class SettingsPage(QWidget):
 
         self.height_spin = QSpinBox()
         self.height_spin.setStyleSheet(
-            """
-            QSpinBox {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QSpinBox {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.height_spin.setMinimum(480)
@@ -331,21 +332,21 @@ class SettingsPage(QWidget):
 
         self.fullscreen_check = QCheckBox("全屏")
         self.fullscreen_check.setStyleSheet(
-            """
-            QCheckBox {
-                color: white;
+            f"""
+            QCheckBox {{
+                color: {ThemeManager().get("text")};
                 background: transparent;
-            }
-            QCheckBox::indicator {
+            }}
+            QCheckBox::indicator {{
                 width: 16px;
                 height: 16px;
-                border: 1px solid #555555;
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 2px;
-                background-color: #444444;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #4CAF50;
-            }
+                background-color: {ThemeManager().get("indicator-background")};
+            }}
+            QCheckBox::indicator:checked {{
+                background-color: {ThemeManager().get("focus-border")};
+            }}
         """
         )
 
@@ -376,19 +377,19 @@ class SettingsPage(QWidget):
         # 创建启动器设置
         launcher_group = QGroupBox("启动器设置")
         launcher_group.setStyleSheet(
-            """
-            QGroupBox {
-                border: 1px solid #555555;
+            f"""
+            QGroupBox {{
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
                 padding-top: 10px;
-            }
-            QGroupBox::title {
-                color: #4CAF50;
+            }}
+            QGroupBox::title {{
+                color: {ThemeManager().get("title")};
                 subcontrol-origin: margin;
                 left: 10px;
                 padding: 0 5px;
-            }
+            }}
         """
         )
         launcher_layout = QFormLayout(launcher_group)
@@ -397,14 +398,14 @@ class SettingsPage(QWidget):
         # 语言
         self.language_combo = QComboBox()
         self.language_combo.setStyleSheet(
-            """
-            QComboBox {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QComboBox {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.language_combo.addItem("简体中文", "zh_CN")
@@ -414,14 +415,14 @@ class SettingsPage(QWidget):
         # 主题
         self.theme_combo = QComboBox()
         self.theme_combo.setStyleSheet(
-            """
-            QComboBox {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QComboBox {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.theme_combo.addItem("深色", "dark")
@@ -431,20 +432,20 @@ class SettingsPage(QWidget):
         # 检查更新
         self.check_updates_check = QCheckBox()
         self.check_updates_check.setStyleSheet(
-            """
-            QCheckBox {
+            f"""
+            QCheckBox {{
                 background: transparent;
-            }
-            QCheckBox::indicator {
+            }}
+            QCheckBox::indicator {{
                 width: 16px;
                 height: 16px;
-                border: 1px solid #555555;
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 2px;
-                background-color: #444444;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #4CAF50;
-            }
+                background-color: {ThemeManager().get("indicator-background")};
+            }}
+            QCheckBox::indicator:checked {{
+                background-color: {ThemeManager().get("focus-border")};
+            }}
         """
         )
         self.check_updates_check.setChecked(True)
@@ -453,20 +454,20 @@ class SettingsPage(QWidget):
         # 游戏启动时关闭启动器
         self.close_launcher_check = QCheckBox()
         self.close_launcher_check.setStyleSheet(
-            """
-            QCheckBox {
+            f"""
+            QCheckBox {{
                 background: transparent;
-            }
-            QCheckBox::indicator {
+            }}
+            QCheckBox::indicator {{
                 width: 16px;
                 height: 16px;
-                border: 1px solid #555555;
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 2px;
-                background-color: #444444;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #4CAF50;
-            }
+                background-color: {ThemeManager().get("indicator-background")};
+            }}
+            QCheckBox::indicator:checked {{
+                background-color: {ThemeManager().get("focus-border")};
+            }}
         """
         )
         self.close_launcher_check.setChecked(True)
@@ -494,19 +495,19 @@ class SettingsPage(QWidget):
         # 创建下载设置
         download_group = QGroupBox("下载设置")
         download_group.setStyleSheet(
-            """
-            QGroupBox {
-                border: 1px solid #555555;
+            f"""
+            QGroupBox {{
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
                 padding-top: 10px;
-            }
-            QGroupBox::title {
-                color: #4CAF50;
+            }}
+            QGroupBox::title {{
+                color: {ThemeManager().get("title")};
                 subcontrol-origin: margin;
                 left: 10px;
                 padding: 0 5px;
-            }
+            }}
         """
         )
         download_layout = QFormLayout(download_group)
@@ -515,14 +516,14 @@ class SettingsPage(QWidget):
         # 下载源
         self.download_source_combo = QComboBox()
         self.download_source_combo.setStyleSheet(
-            """
-            QComboBox {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QComboBox {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.download_source_combo.addItem("官方", "official")
@@ -533,14 +534,14 @@ class SettingsPage(QWidget):
         # 并发下载数
         self.concurrent_downloads_spin = QSpinBox()
         self.concurrent_downloads_spin.setStyleSheet(
-            """
-            QSpinBox {
-                background-color: #444444;
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QSpinBox {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
+            }}
         """
         )
         self.concurrent_downloads_spin.setMinimum(1)
@@ -551,20 +552,20 @@ class SettingsPage(QWidget):
         # 下载资源
         self.download_assets_check = QCheckBox()
         self.download_assets_check.setStyleSheet(
-            """
-            QCheckBox {
+            f"""
+            QCheckBox {{
                 background: transparent;
-            }
-            QCheckBox::indicator {
+            }}
+            QCheckBox::indicator {{
                 width: 16px;
                 height: 16px;
-                border: 1px solid #555555;
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 2px;
-                background-color: #444444;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #4CAF50;
-            }
+                background-color: {ThemeManager().get("indicator-background")};
+            }}
+            QCheckBox::indicator:checked {{
+                background-color: {ThemeManager().get("focus-border")};
+            }}
         """
         )
         self.download_assets_check.setChecked(True)
@@ -573,20 +574,20 @@ class SettingsPage(QWidget):
         # 下载库文件
         self.download_libraries_check = QCheckBox()
         self.download_libraries_check.setStyleSheet(
-            """
-            QCheckBox {
+            f"""
+            QCheckBox {{
                 background: transparent;
-            }
-            QCheckBox::indicator {
+            }}
+            QCheckBox::indicator {{
                 width: 16px;
                 height: 16px;
-                border: 1px solid #555555;
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 2px;
-                background-color: #444444;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #4CAF50;
-            }
+                background-color: {ThemeManager().get("indicator-background")};
+            }}
+            QCheckBox::indicator:checked {{
+                background-color: {ThemeManager().get("focus-border")};
+            }}
         """
         )
         self.download_libraries_check.setChecked(True)

@@ -7,11 +7,21 @@
 from typing import Any, Dict, List
 
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import (QComboBox, QFrame, QHBoxLayout, QLabel,
-                               QListWidget, QProgressBar,
-                               QPushButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QProgressBar,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from Controller import GameController
+
+from .theme_manager import ThemeManager
 
 
 class InstallationsPage(QWidget):
@@ -55,18 +65,18 @@ class InstallationsPage(QWidget):
         # 创建标题
         title_label = QLabel("安装管理")
         title_label.setStyleSheet(
-            "color: white; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("text")}; font-size: 24px; font-weight: bold; background: transparent;"
         )
         main_layout.addWidget(title_label)
 
         # 创建已安装版本列表
         installed_frame = QFrame()
         installed_frame.setStyleSheet(
-            """
-            QFrame {
-                background-color: rgba(51, 51, 51, 200);
+            f"""
+            QFrame {{
+                background-color: {ThemeManager().get("qframe-background")};
                 border-radius: 8px;
-            }
+            }}
         """
         )
         installed_layout = QVBoxLayout(installed_frame)
@@ -75,33 +85,33 @@ class InstallationsPage(QWidget):
         # 创建已安装版本标题
         installed_title = QLabel("已安装版本")
         installed_title.setStyleSheet(
-            "color: #4CAF50; font-size: 18px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
         )
         installed_layout.addWidget(installed_title)
 
         # 创建已安装版本列表
         self.installed_list = QListWidget()
         self.installed_list.setStyleSheet(
-            """
-            QListWidget {
-                background-color: rgba(68, 68, 68, 200);
-                border: 1px solid #555555;
+            f"""
+            QListWidget {{
+                background-color: {ThemeManager().get("text-box-background")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 5px;
-            }
-            QListWidget::item {
-                color: white;
+            }}
+            QListWidget::item {{
+                color: {ThemeManager().get("text")};
                 padding: 8px;
                 margin: 2px 0px;
                 border-radius: 4px;
-            }
-            QListWidget::item:hover {
-                background-color: rgba(85, 85, 85, 200);
-            }
-            QListWidget::item:selected {
-                background-color: #4CAF50;
-                color: white;
-            }
+            }}
+            QListWidget::item:hover {{
+                background-color: {ThemeManager().get("disabled-selection")};
+            }}
+            QListWidget::item:selected {{
+                background-color: {ThemeManager().get("selection-background")};
+                color: {ThemeManager().get("text")};
+            }}
         """
         )
         installed_layout.addWidget(self.installed_list)
@@ -112,21 +122,21 @@ class InstallationsPage(QWidget):
         # 创建删除按钮
         self.delete_button = QPushButton("删除")
         self.delete_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #FF5555;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("negative-selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #FF3333;
-            }
-            QPushButton:disabled {
-                background-color: rgba(85, 85, 85, 200);
-                color: #888888;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("negative-selection-hover")};
+            }}
+            QPushButton:disabled {{
+                background-color: {ThemeManager().get("disabled-selection")};
+                color: {ThemeManager().get("disabled-selection-text")};
+            }}
         """
         )
         self.delete_button.setEnabled(False)
@@ -134,21 +144,21 @@ class InstallationsPage(QWidget):
         # 创建启动按钮
         self.launch_button = QPushButton("启动")
         self.launch_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:disabled {
-                background-color: rgba(85, 85, 85, 200);
-                color: #888888;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("selection-hover")};
+            }}
+            QPushButton:disabled {{
+                background-color: {ThemeManager().get("disabled-selection")};;
+                color: {ThemeManager().get("disabled-selection-text")};
+            }}
         """
         )
         self.launch_button.setEnabled(False)
@@ -164,11 +174,11 @@ class InstallationsPage(QWidget):
         # 创建安装新版本区域
         install_frame = QFrame()
         install_frame.setStyleSheet(
-            """
-            QFrame {
-                background-color: rgba(51, 51, 51, 200);
+            f"""
+            QFrame {{
+                background-color: {ThemeManager().get("qframe-background")};
                 border-radius: 8px;
-            }
+            }}
         """
         )
         install_layout = QVBoxLayout(install_frame)
@@ -177,7 +187,7 @@ class InstallationsPage(QWidget):
         # 创建安装新版本标题
         install_title = QLabel("安装新版本")
         install_title.setStyleSheet(
-            "color: #4CAF50; font-size: 18px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
         )
         install_layout.addWidget(install_title)
 
@@ -185,29 +195,29 @@ class InstallationsPage(QWidget):
         version_layout = QHBoxLayout()
         version_label = QLabel("选择版本:")
         version_label.setStyleSheet(
-            "color: #BBBBBB; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
         self.version_combo = QComboBox()
         self.version_combo.setStyleSheet(
-            """
-            QComboBox {
-                background-color: rgba(68, 68, 68, 200);
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QComboBox {{
+                background-color: {ThemeManager().get("text-box-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
                 min-width: 200px;
-            }
-            QComboBox::drop-down {
+            }}
+            QComboBox::drop-down {{
                 border: none;
                 width: 20px;
-            }
-            QComboBox QAbstractItemView {
-                background-color: rgba(68, 68, 68, 200);
-                color: white;
-                border: 1px solid #555555;
-                selection-background-color: #4CAF50;
-            }
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {ThemeManager().get("text-box-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
+                selection-background-color: {ThemeManager().get("selection-background")};
+            }}
         """
         )
 
@@ -218,21 +228,21 @@ class InstallationsPage(QWidget):
         # 创建安装按钮
         self.install_button = QPushButton("安装")
         self.install_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:disabled {
-                background-color: rgba(85, 85, 85, 200);
-                color: #888888;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("selection-hover")};
+            }}
+            QPushButton:disabled {{
+                background-color: {ThemeManager().get("disabled-selection")};;
+                color: {ThemeManager().get("disabled-selection-text")};
+            }}
         """
         )
         version_layout.addWidget(self.install_button)
@@ -242,17 +252,17 @@ class InstallationsPage(QWidget):
         # 创建进度条（默认隐藏）
         self.progress_bar = QProgressBar()
         self.progress_bar.setStyleSheet(
-            """
-            QProgressBar {
-                background-color: rgba(68, 68, 68, 200);
-                color: white;
+            f"""
+            QProgressBar {{
+                background-color: {ThemeManager().get("progress-bar-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 text-align: center;
-            }
-            QProgressBar::chunk {
-                background-color: #4CAF50;
+            }}
+            QProgressBar::chunk {{
+                background-color: {ThemeManager().get("selection-background")};
                 border-radius: 4px;
-            }
+            }}
         """
         )
         self.progress_bar.setVisible(False)
