@@ -5,4 +5,4 @@
 
 from .downloader import FileDownloader
 
-__all__ = ['FileDownloader']
+__all__ = ["FileDownloader"]

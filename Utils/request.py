@@ -1,16 +1,18 @@
 from typing import Callable
+
 import httpx
 
 from Utils.Exceptions import *
 from Utils.tools import empty
 
+
 async def request_json(
-        url: str,
-        method: str = "GET",
-        headers: dict = {},
-        finnished: Callable = empty,
-        error: Callable = empty,
-) -> dict|list|None:
+    url: str,
+    method: str = "GET",
+    headers: dict = {},
+    finnished: Callable = empty,
+    error: Callable = empty,
+) -> dict | list | None:
     """
     发送请求并返回 JSON 数据
     """
@@ -26,19 +28,21 @@ async def request_json(
                 response = await client.delete(url, headers=headers)
             else:
                 raise NetworkException(f"不支持的HTTP方法: {method}")
-            
+
             response.raise_for_status()
             json_data = response.json()
-            
+
             if finnished and callable(finnished):
                 finnished(json_data)
-            
+
             return json_data
     except httpx.HTTPStatusError as e:
         error_msg = f"HTTP状态错误: {e.response.status_code} - {url}"
         if error and callable(error):
             error(error_msg)
-        raise ApiException(error_msg, details={"status_code": e.response.status_code, "url": url})
+        raise ApiException(
+            error_msg, details={"status_code": e.response.status_code, "url": url}
+        )
     except httpx.RequestError as e:
         error_msg = f"请求错误: {str(e)} - {url}"
         if error and callable(error):

@@ -14,14 +14,6 @@
     user: 用户管理模块
 """
 
-from . import Repository
-from . import request
-from . import version
-from . import user
+from . import Repository, request, user, version
 
-__all__ = [
-    'Repository',
-    'request', 
-    'version',
-    'user'
-]
+__all__ = ["Repository", "request", "version", "user"]

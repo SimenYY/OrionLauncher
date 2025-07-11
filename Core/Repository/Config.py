@@ -1,5 +1,6 @@
 from Utils.abc import Repository
 
+
 class Config(Repository):
     def __init__(self):
         super().__init__()
