@@ -77,16 +77,16 @@ class IDownloadMultiThread(Protocol):
         """任务进度；0-100"""
     def size(self, size: int):
         """任务数据大小；单位：字节"""
-    def downloaded_size(self, task: str, size: int):
-        """任务已下载大小；单位：字节"""
+    def downloaded_size(self, size: int):
+        """任务已下载的总大小；单位：字节"""
     def speed(self, speed: int):
         """任务下载速度；单位：字节/秒"""
     def progress(self, progress: int):
         """任务总进度；0-100"""
-    def finished(self, task: str):
-        """任务完成信号"""
-    def error(self, task: str, error: Exception):
-        """任务错误信号，传递错误"""
+    def finished(self):
+        """整个下载任务完成信号"""
+    def error(self, error: Exception):
+        """整个下载任务错误信号，传递错误"""
 
 class IInstallGame(Protocol):
     """
