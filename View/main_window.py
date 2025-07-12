@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
     QFrame,
 )
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QPixmap, QCloseEvent
+from PySide6.QtGui import QPixmap, QCloseEvent, QPainter, QColor
 
 from Core.Repository import path
 from Controller import GameController, AccountController, SettingsController
@@ -26,6 +26,7 @@ from .installations_page import InstallationsPage
 from .settings_page import SettingsPage
 from .login_dialog import LoginDialog
 from .theme_manager import ThemeManager
+from Utils.tools import delete_layout
 
 
 class MainWindow(QMainWindow):
@@ -76,6 +77,8 @@ class MainWindow(QMainWindow):
             if not self.bg_pixmap.isNull():
                 # 设置初始大小
                 self._update_background_size()
+                # 设置背景图透明度
+                self._set_background_overlay()
 
                 # 将背景标签置于底层
                 self.bg_label.lower()
@@ -113,6 +116,21 @@ class MainWindow(QMainWindow):
 
             # 设置对齐方式为居中
             self.bg_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+    def _set_background_overlay(self):
+        """设置背景图片透明度"""
+        opacity = ThemeManager().get_background_opacity()
+        self.bg_mask_label = QLabel(self)
+        self.bg_mask_label.setStyleSheet(
+            f"background-color: rgba(255, 255, 255, {int(255 * opacity)})"
+        )
+        self.bg_mask_label.setAttribute(
+            Qt.WA_TransparentForMouseEvents
+        )  # Allows clicks to pass through
+        self.bg_mask_label.setGeometry(
+            self.bg_label.geometry()
+        )  # Overlay same position
+        self.bg_mask_label.show()
 
     def _init_ui(self):
         """初始化UI"""
@@ -203,7 +221,7 @@ class MainWindow(QMainWindow):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme_text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
@@ -258,15 +276,18 @@ class MainWindow(QMainWindow):
     def _create_pages(self):
         """创建页面"""
         # 首页
-        self.home_page = HomePage(self.game_controller, self.account_controller)
+        if getattr(self, "home_page", None) is None:
+            self.home_page = HomePage(self.game_controller, self.account_controller)
         self.content_stack.addWidget(self.home_page)
 
         # 安装管理页
-        self.installations_page = InstallationsPage(self.game_controller)
+        if getattr(self, "installations_page", None) is None:
+            self.installations_page = InstallationsPage(self.game_controller)
         self.content_stack.addWidget(self.installations_page)
 
         # 设置页
-        self.settings_page = SettingsPage(self.settings_controller)
+        if getattr(self, "settings_page", None) is None:
+            self.settings_page = SettingsPage(self.settings_controller)
         self.content_stack.addWidget(self.settings_page)
 
     def _init_controllers(self):
@@ -288,6 +309,19 @@ class MainWindow(QMainWindow):
         # 账户控制器信号
         self.account_controller.login_success.connect(self._handle_login_success)
         self.account_controller.logout_completed.connect(self._handle_logout_completed)
+
+        # UI刷新信号
+        ThemeManager().updated.connect(self._refresh_ui)
+
+    def _refresh_ui(self):
+        """刷新所有UI组件"""
+        delete_layout(self.layout())
+        self.bg_mask_label.deleteLater()
+        self._set_background()
+        self._init_ui()
+        self._connect_signals()
+        # 默认回到设置页面
+        self._switch_page(2)
 
     def resizeEvent(self, event):
         """

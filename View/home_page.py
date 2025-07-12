@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from Controller import AccountController, GameController
 
 from .theme_manager import ThemeManager
+from Utils.tools import delete_layout
 
 
 class HomePage(QWidget):
@@ -165,7 +166,7 @@ class HomePage(QWidget):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme_text")};
                 border-radius: 4px;
                 padding: 15px;
                 font-size: 18px;
@@ -222,6 +223,18 @@ class HomePage(QWidget):
 
         # 版本选择信号
         self.version_combo.currentIndexChanged.connect(self._handle_version_changed)
+
+        # UI刷新
+        ThemeManager().updated.connect(self._refresh_ui)
+
+    def _refresh_ui(self):
+        """刷新所有UI组件"""
+        old_layout = self.layout()
+        QWidget().setLayout(old_layout)
+        delete_layout(old_layout)
+        self._init_ui()
+        self._connect_signals()
+        self.game_controller.refresh_version_list()
 
     @Slot(list)
     def _handle_version_list_updated(self, versions: List[Dict[str, Any]]):

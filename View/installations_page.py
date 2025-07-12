@@ -65,7 +65,7 @@ class InstallationsPage(QWidget):
         # 创建标题
         title_label = QLabel("安装管理")
         title_label.setStyleSheet(
-            f"color: {ThemeManager().get("text")}; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
         )
         main_layout.addWidget(title_label)
 
@@ -110,7 +110,7 @@ class InstallationsPage(QWidget):
             }}
             QListWidget::item:selected {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
             }}
         """
         )
@@ -125,7 +125,7 @@ class InstallationsPage(QWidget):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("negative-selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
@@ -147,7 +147,7 @@ class InstallationsPage(QWidget):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme_text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
@@ -231,7 +231,7 @@ class InstallationsPage(QWidget):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
@@ -286,6 +286,21 @@ class InstallationsPage(QWidget):
 
         # 列表信号
         self.installed_list.itemSelectionChanged.connect(self._handle_selection_changed)
+
+        # UI刷新
+        ThemeManager().updated.connect(self._refresh_ui)
+
+    def _delete_layout(self):
+        """删除所有UI组件"""
+        old_layout = self.layout()
+        QWidget().setLayout(old_layout)
+
+    def _refresh_ui(self):
+        """刷新所有UI组件"""
+        self._delete_layout()
+        self._init_ui()
+        self._connect_signals()
+        self.game_controller.refresh_version_list()
 
     @Slot(list)
     def _handle_version_list_updated(self, versions: List[Dict[str, Any]]):

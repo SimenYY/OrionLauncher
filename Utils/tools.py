@@ -51,3 +51,20 @@ def empty(*args, **kwargs) -> None:
             f"    with {caller.line}"
         )
     return None
+
+
+def delete_layout(layout):
+    """删除所有UI组件及其所有子组件"""
+    try:
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            child_layout = item.layout()
+            if widget:
+                widget.hide()
+                widget.setParent(None)
+                widget.deleteLater()
+            elif child_layout:
+                delete_layout(layout)
+    except RuntimeError:
+        pass

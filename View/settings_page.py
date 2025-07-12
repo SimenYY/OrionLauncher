@@ -25,6 +25,7 @@ from PySide6.QtCore import Slot
 
 from Controller import SettingsController
 from .theme_manager import ThemeManager
+from Utils.tools import delete_layout
 
 
 class SettingsPage(QWidget):
@@ -62,7 +63,7 @@ class SettingsPage(QWidget):
         # 创建标题
         title_label = QLabel("设置")
         title_label.setStyleSheet(
-            f"color: {ThemeManager().get("text")}; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
         )
         main_layout.addWidget(title_label)
 
@@ -74,6 +75,9 @@ class SettingsPage(QWidget):
                 border: 1px solid {ThemeManager().get("border")};
                 background-color: {ThemeManager().get("tab-selection-background")};
                 border-radius: 4px;
+            }}
+            QTabBar {{
+                background-color: {ThemeManager().get("tab-bar-background")};
             }}
             QTabBar::tab {{
                 background-color: {ThemeManager().get("tab-background")};
@@ -121,7 +125,7 @@ class SettingsPage(QWidget):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 8px 16px;
                 font-size: 14px;
@@ -131,9 +135,14 @@ class SettingsPage(QWidget):
             }}
         """
         )
+        self.save_button.clicked.connect(self._on_save_button_click)
         button_layout.addWidget(self.save_button)
 
         main_layout.addLayout(button_layout)
+
+    def _on_save_button_click(self):
+        # 处理主题切换
+        ThemeManager().setTheme(self.theme_combo.currentData())
 
     def _create_game_tab(self) -> QWidget:
         """
@@ -143,6 +152,9 @@ class SettingsPage(QWidget):
             QWidget: 游戏选项卡部件
         """
         tab = QWidget()
+        tab.setStyleSheet(
+            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+        )
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(20)
@@ -152,6 +164,7 @@ class SettingsPage(QWidget):
         path_group.setStyleSheet(
             f"""
             QGroupBox {{
+                background-color: {ThemeManager().get("home-window-background")};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -239,6 +252,7 @@ class SettingsPage(QWidget):
         game_group.setStyleSheet(
             f"""
             QGroupBox {{
+                background-color: {ThemeManager().get("home-window-background")};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -370,6 +384,9 @@ class SettingsPage(QWidget):
             QWidget: 启动器选项卡部件
         """
         tab = QWidget()
+        tab.setStyleSheet(
+            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+        )
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(20)
@@ -379,6 +396,7 @@ class SettingsPage(QWidget):
         launcher_group.setStyleSheet(
             f"""
             QGroupBox {{
+                background-color: {ThemeManager().get("home-window-background")};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -425,8 +443,18 @@ class SettingsPage(QWidget):
             }}
         """
         )
-        self.theme_combo.addItem("深色", "dark")
-        self.theme_combo.addItem("浅色", "light")
+
+        # 当前主题色放置于最顶端
+        match ThemeManager().get_base_theme():
+            case "dark":
+                self.theme_combo.addItem("深色", "dark")
+                self.theme_combo.addItem("浅色", "light")
+            case "light":
+                self.theme_combo.addItem("浅色", "light")
+                self.theme_combo.addItem("深色", "dark")
+            case _:
+                self.theme_combo.addItem("深色", "dark")
+                self.theme_combo.addItem("浅色", "light")
         launcher_layout.addRow("主题:", self.theme_combo)
 
         # 检查更新
@@ -488,6 +516,9 @@ class SettingsPage(QWidget):
             QWidget: 下载选项卡部件
         """
         tab = QWidget()
+        tab.setStyleSheet(
+            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+        )
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(20)
@@ -497,6 +528,7 @@ class SettingsPage(QWidget):
         download_group.setStyleSheet(
             f"""
             QGroupBox {{
+                background-color: {ThemeManager().get("home-window-background")};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -613,6 +645,16 @@ class SettingsPage(QWidget):
 
         # 加载设置
         self.settings_controller.load_settings()
+
+        # UI刷新
+        ThemeManager().updated.connect(self._refresh_ui)
+
+    def _refresh_ui(self):
+        """刷新所有UI组件"""
+        old_layout = self.layout()
+        QWidget().setLayout(old_layout)
+        delete_layout(old_layout)
+        self._init_ui()
 
     @Slot(dict)
     def _handle_settings_loaded(self, settings: Dict[str, Any]):
