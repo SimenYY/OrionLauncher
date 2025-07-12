@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Slot
 
+from .theme_manager import ThemeManager
+
 
 class ProgressDialog(QDialog):
     """
@@ -50,24 +52,24 @@ class ProgressDialog(QDialog):
         # 创建任务标签
         self.task_label = QLabel("正在处理...")
         self.task_label.setStyleSheet(
-            "color: white; font-size: 16px; background: transparent;"
+            f"color: {ThemeManager().get("text")}; font-size: 16px; background: transparent;"
         )
         main_layout.addWidget(self.task_label)
 
         # 创建进度条
         self.progress_bar = QProgressBar()
         self.progress_bar.setStyleSheet(
-            """
-            QProgressBar {
-                background-color: #444444;
-                color: white;
+            f"""
+            QProgressBar {{
+                background-color: {ThemeManager().get("progress-bar-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 text-align: center;
-            }
-            QProgressBar::chunk {
-                background-color: #4CAF50;
+            }}
+            QProgressBar::chunk {{
+                background-color: {ThemeManager().get("progress-bar")};
                 border-radius: 4px;
-            }
+            }}
         """
         )
         self.progress_bar.setMinimum(0)
@@ -78,7 +80,7 @@ class ProgressDialog(QDialog):
         # 创建详细信息标签
         self.detail_label = QLabel()
         self.detail_label.setStyleSheet(
-            "color: #BBBBBB; font-size: 12px; background: transparent;"
+            f"color: {ThemeManager().get("label")}; font-size: 12px; background: transparent;"
         )
         self.detail_label.setWordWrap(True)
         main_layout.addWidget(self.detail_label)
@@ -96,17 +98,17 @@ class ProgressDialog(QDialog):
         # 创建取消按钮
         self.cancel_button = QPushButton("取消")
         self.cancel_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #555555;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("neutral-selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px 16px;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #666666;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("neutral-selection-hover")};
+            }}
         """
         )
         button_layout.addWidget(self.cancel_button)

@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Slot
 
 from Controller import AccountController
+from .theme_manager import ThemeManager
 
 
 class LoginDialog(QDialog):
@@ -44,11 +45,11 @@ class LoginDialog(QDialog):
 
         # 设置窗口样式
         self.setStyleSheet(
-            """
-            QDialog {
-                background-color: rgba(46, 46, 46, 240);
+            f"""
+            QDialog {{
+                background-color: {ThemeManager().get("qdialog-background")};
                 border-radius: 10px;
-            }
+            }}
         """
         )
 
@@ -68,7 +69,7 @@ class LoginDialog(QDialog):
         # 创建标题
         title_label = QLabel("登录您的账户")
         title_label.setStyleSheet(
-            "color: #4CAF50; font-size: 20px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("title")}; font-size: 20px; font-weight: bold; background: transparent;"
         )
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(title_label)
@@ -76,8 +77,8 @@ class LoginDialog(QDialog):
         # 创建表单
         form_frame = QFrame()
         form_frame.setStyleSheet(
-            """
-            background-color: rgba(51, 51, 51, 200);
+            f"""
+            background-color: {ThemeManager().get("qframe-background")};
             border-radius: 8px;
         """
         )
@@ -88,21 +89,21 @@ class LoginDialog(QDialog):
         # 用户名输入
         username_label = QLabel("用户名:")
         username_label.setStyleSheet(
-            "color: #BBBBBB; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
         self.username_edit = QLineEdit()
         self.username_edit.setStyleSheet(
-            """
-            QLineEdit {
-                background-color: rgba(68, 68, 68, 200);
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QLineEdit {{
+                background-color: {ThemeManager().get("text-box-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #4CAF50;
-            }
+            }}
+            QLineEdit:focus {{
+                border: 1px solid {ThemeManager().get("focus-border")};
+            }}
         """
         )
         self.username_edit.setPlaceholderText("输入您的用户名")
@@ -112,21 +113,21 @@ class LoginDialog(QDialog):
         # 密码输入
         password_label = QLabel("密码:")
         password_label.setStyleSheet(
-            "color: #BBBBBB; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
         self.password_edit = QLineEdit()
         self.password_edit.setStyleSheet(
-            """
-            QLineEdit {
-                background-color: rgba(68, 68, 68, 200);
-                color: white;
-                border: 1px solid #555555;
+            f"""
+            QLineEdit {{
+                background-color: {ThemeManager().get("text-box-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 padding: 8px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #4CAF50;
-            }
+            }}
+            QLineEdit:focus {{
+                border: 1px solid {ThemeManager().get("focus-border")};
+            }}
         """
         )
         self.password_edit.setPlaceholderText("输入您的密码")
@@ -140,7 +141,7 @@ class LoginDialog(QDialog):
         # 创建错误信息标签（默认隐藏）
         self.error_label = QLabel()
         self.error_label.setStyleSheet(
-            "color: #FF5555; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get("negative-selection-background")}; font-size: 14px; background: transparent;"
         )
         self.error_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.error_label.setVisible(False)
@@ -156,38 +157,38 @@ class LoginDialog(QDialog):
         # 取消按钮
         self.cancel_button = QPushButton("取消")
         self.cancel_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: rgba(85, 85, 85, 200);
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("neutral-selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: rgba(102, 102, 102, 200);
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("neutral-selection-hover")};
+            }}
         """
         )
 
         # 登录按钮
         self.login_button = QPushButton("登录")
         self.login_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:disabled {
-                background-color: rgba(85, 85, 85, 200);
-                color: #888888;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("selection-hover")};
+            }}
+            QPushButton:disabled {{
+                background-color: {ThemeManager().get("disabled-selection")};
+                color: {ThemeManager().get("disabled-selection-text")};
+            }}
         """
         )
 

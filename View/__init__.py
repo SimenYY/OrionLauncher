@@ -10,6 +10,7 @@ from .login_dialog import LoginDialog
 from .main_window import MainWindow
 from .progress_dialog import ProgressDialog
 from .settings_page import SettingsPage
+from .theme_manager import ThemeManager
 
 __all__ = [
     "MainWindow",
@@ -18,4 +19,5 @@ __all__ = [
     "SettingsPage",
     "LoginDialog",
     "ProgressDialog",
+    "ThemeManager",
 ]

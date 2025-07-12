@@ -25,6 +25,7 @@ from .home_page import HomePage
 from .installations_page import InstallationsPage
 from .settings_page import SettingsPage
 from .login_dialog import LoginDialog
+from .theme_manager import ThemeManager
 
 
 class MainWindow(QMainWindow):
@@ -154,11 +155,11 @@ class MainWindow(QMainWindow):
         sidebar = QFrame()
         sidebar.setObjectName("sidebar")
         sidebar.setStyleSheet(
-            """
-            #sidebar {
-                background-color: rgba(46, 46, 46, 180);
-                border-right: 1px solid #3E3E3E;
-            }
+            f"""
+            #sidebar {{
+                background-color: {ThemeManager().get("sidebar-background")};
+                border-right: 1px solid {ThemeManager().get("sidebar-border")};
+            }}
         """
         )
 
@@ -170,7 +171,7 @@ class MainWindow(QMainWindow):
         # 创建标题
         logo_label = QLabel("Orion Launcher")
         logo_label.setStyleSheet(
-            "color: #4CAF50; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
         )
         sidebar_layout.addWidget(logo_label)
 
@@ -192,24 +193,24 @@ class MainWindow(QMainWindow):
         # 创建用户信息区域
         self.user_info = QLabel("未登录")
         self.user_info.setStyleSheet(
-            "color: #BBBBBB; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
         sidebar_layout.addWidget(self.user_info)
 
         # 创建登录/登出按钮
         self.login_btn = QPushButton("登录")
         self.login_btn.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("selection-background")};
+                color: {ThemeManager().get("text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("selection-hover")};
+            }}
         """
         )
         sidebar_layout.addWidget(self.login_btn)
@@ -231,25 +232,25 @@ class MainWindow(QMainWindow):
         btn.setObjectName(f"nav_{name}")
         btn.setCheckable(True)
         btn.setStyleSheet(
-            """
-            QPushButton {
+            f"""
+            QPushButton {{
                 background-color: transparent;
-                color: #BBBBBB;
+                color: {ThemeManager().get("label")};
                 border: none;
                 text-align: left;
                 padding: 10px;
                 font-size: 16px;
                 border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: rgba(62, 62, 62, 150);
-                color: white;
-            }
-            QPushButton:checked {
-                background-color: rgba(62, 62, 62, 150);
-                color: #4CAF50;
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("label-hover")};
+                color: {ThemeManager().get("text")};
+            }}
+            QPushButton:checked {{
+                background-color: {ThemeManager().get("label-hover")};
+                color: {ThemeManager().get("selection-background")};
                 font-weight: bold;
-            }
+            }}
         """
         )
         return btn
