@@ -7,6 +7,7 @@ OrionLauncher 的完整 API 参考文档。
    :maxdepth: 2
    :caption: 模块列表:
 
+   callbacks
    controller
    core
    utils
