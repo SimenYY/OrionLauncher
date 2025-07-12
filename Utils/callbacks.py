@@ -110,6 +110,18 @@ class IVerifyGameFile(Protocol):
     def error(self, error: Exception):
         """任务错误信号，传递错误"""
 
+class IInstallAddon(Protocol):
+    """
+    附加组件安装（Fabric/Forge/NeoForge/Quilt）
+    """
+    def start(self):
+        """任务开始信号"""
+    def finished(self):
+        """任务完成信号"""
+    def error(self, error: Exception):
+        """任务错误信号，传递错误"""
+
+
 class InstallationCallbackGroup(CallbackGroup):
     """
     类型化的安装器回调组
@@ -119,7 +131,27 @@ class InstallationCallbackGroup(CallbackGroup):
         ...
 
     @overload
-    def __getattr__(self, name: Literal["install"]) -> IInstallGame:
+    def __getattr__(self, name: Literal["install_game"]) -> IInstallGame:
+        ...
+
+    @overload
+    def __getattr__(self, name: Literal["install_forge"]) -> IInstallAddon:
+        ...
+
+    @overload
+    def __getattr__(self, name: Literal["install_neoforge"]) -> IInstallAddon:
+        ...
+
+    @overload
+    def __getattr__(self, name: Literal["install_fabric"]) -> IInstallAddon:
+        ...
+
+    @overload
+    def __getattr__(self, name: Literal["install_quilt"]) -> IInstallAddon:
+        ...
+
+    @overload
+    def __getattr__(self, name: Literal["install_liteloader"]) -> IInstallAddon:
         ...
 
     @overload
