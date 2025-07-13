@@ -6,7 +6,8 @@
 import asyncio
 import logging
 import time
-from typing import List, Dict
+from typing import List, Dict, Optional
+from urllib.parse import urlparse
 
 from Utils.callbacks import IDownloadSingle, IDownloadMultiThread, Callbacks
 from Utils.types import DownloadFile
@@ -16,6 +17,76 @@ from Utils.Exceptions.code import CoreErrorCodes
 import httpx
 
 logger = logging.getLogger(__name__)
+
+
+class ConnectionPoolManager:
+    """HTTP连接池管理器
+
+    为不同的域名维护独立的连接池，优化大量小文件下载的性能。
+    """
+
+    def __init__(self, max_connections_per_host: int = 20, max_keepalive_connections: int = 10):
+        """初始化连接池管理器
+
+        Args:
+            max_connections_per_host: 每个主机的最大连接数
+            max_keepalive_connections: 最大保持活跃的连接数
+        """
+        self._clients: Dict[str, httpx.AsyncClient] = {}
+        self._max_connections_per_host = max_connections_per_host
+        self._max_keepalive_connections = max_keepalive_connections
+        self._lock = asyncio.Lock()
+
+    async def get_client(self, url: str) -> httpx.AsyncClient:
+        """获取指定URL对应的HTTP客户端
+
+        Args:
+            url: 目标URL
+
+        Returns:
+            HTTP客户端实例
+        """
+        parsed = urlparse(url)
+        host_key = f"{parsed.scheme}://{parsed.netloc}"
+
+        async with self._lock:
+            if host_key not in self._clients:
+                # 创建针对该主机优化的HTTP客户端
+                limits = httpx.Limits(
+                    max_connections=self._max_connections_per_host,
+                    max_keepalive_connections=self._max_keepalive_connections
+                )
+
+                self._clients[host_key] = httpx.AsyncClient(
+                    limits=limits,
+                    timeout=httpx.Timeout(30.0, connect=10.0),
+                    http2=True,  # 启用HTTP/2支持
+                    follow_redirects=True
+                )
+
+                logger.debug(f"为主机 {host_key} 创建新的HTTP客户端")
+
+            return self._clients[host_key]
+
+    async def close_all(self):
+        """关闭所有HTTP客户端"""
+        async with self._lock:
+            for client in self._clients.values():
+                await client.aclose()
+            self._clients.clear()
+            logger.debug("已关闭所有HTTP客户端")
+
+
+# 全局连接池管理器实例
+_connection_pool_manager: Optional[ConnectionPoolManager] = None
+
+
+async def get_connection_pool_manager() -> ConnectionPoolManager:
+    """获取全局连接池管理器实例"""
+    global _connection_pool_manager
+    if _connection_pool_manager is None:
+        _connection_pool_manager = ConnectionPoolManager()
+    return _connection_pool_manager
 
 
 class FileDownloader:
@@ -91,82 +162,95 @@ class FileDownloader:
 
         Note:
             * 下载过程中会定期检查取消状态
-            * 使用512KB的分块大小进行下载
+            * 根据文件大小动态调整分块大小
             * 每秒更新一次下载速度
             * 如果无法获取文件大小，进度回调不会被调用
             * 使用回调组统一管理所有下载事件
             * 如果 file 对象中未提供 size，将尝试从响应头获取
+            * 使用连接池优化网络连接复用
         """
         self._is_cancelled = False
-        
+
         try:
             # 验证必需字段
             if "url" not in file:
                 raise DownloadException("下载文件缺少必需的URL字段", CoreErrorCodes.DOWNLOAD_GENERAL_ERROR)
             if "path" not in file:
                 raise DownloadException("下载文件缺少必需的路径字段", CoreErrorCodes.DOWNLOAD_GENERAL_ERROR)
-            
+
             logger.info(f"开始下载文件: {file['url']} -> {file['path']}")
-            
+
             # 通知开始下载
             self._callback_group.start()
-            
-            # 大文件分片大小 (512KB)
-            chunk_size = 512 * 1024
+
             # 用于计算下载速度
             last_time = time.time()
             last_size = 0
 
             try:
-                async with httpx.AsyncClient(timeout=30.0) as client:
-                    async with client.stream("GET", file["url"]) as response:
-                        response.raise_for_status()  # 如果请求失败则抛出异常
+                # 使用连接池管理器获取HTTP客户端
+                pool_manager = await get_connection_pool_manager()
+                client = await pool_manager.get_client(file["url"])
 
-                        # 优先使用传入的size参数，如未提供则从响应头获取
-                        total_size = (
-                            file.get("size", 0) if file.get("size", 0) > 0 
-                            else int(response.headers.get("Content-Length", 0))
-                        )
-                        downloaded_size = 0
-                        
-                        logger.debug(f"文件大小: {total_size} 字节")
+                async with client.stream("GET", file["url"]) as response:
+                    response.raise_for_status()  # 如果请求失败则抛出异常
 
-                        try:
-                            with open(file["path"], "wb") as f:
-                                async for chunk in response.aiter_bytes(chunk_size):
-                                    if self._is_cancelled:
-                                        logger.info(f"下载被用户取消: {file['path']}")
-                                        raise asyncio.CancelledError("下载被用户取消")
+                    # 优先使用传入的size参数，如未提供则从响应头获取
+                    total_size = (
+                        file.get("size", 0) if file.get("size", 0) > 0
+                        else int(response.headers.get("Content-Length", 0))
+                    )
+                    downloaded_size = 0
 
-                                    f.write(chunk)
-                                    downloaded_size += len(chunk)
+                    # 根据文件大小动态调整分块大小
+                    if total_size > 0:
+                        if total_size < 1024 * 1024:  # 小于1MB的文件
+                            chunk_size = min(8 * 1024, total_size)  # 8KB或文件大小
+                        elif total_size < 10 * 1024 * 1024:  # 小于10MB的文件
+                            chunk_size = 64 * 1024  # 64KB
+                        else:  # 大文件
+                            chunk_size = 512 * 1024  # 512KB
+                    else:
+                        chunk_size = 64 * 1024  # 默认64KB
 
-                                    # 报告字节级进度
-                                    self._callback_group.bytes_downloaded(downloaded_size, total_size)
+                    logger.debug(f"文件大小: {total_size} 字节，分块大小: {chunk_size} 字节")
 
-                                    # 计算并回调下载进度
-                                    if total_size > 0:
-                                        percentage = int((downloaded_size / total_size) * 100)
-                                        self._callback_group.progress(percentage)
+                    try:
+                        with open(file["path"], "wb") as f:
+                            async for chunk in response.aiter_bytes(chunk_size):
+                                if self._is_cancelled:
+                                    logger.info(f"下载被用户取消: {file['path']}")
+                                    raise asyncio.CancelledError("下载被用户取消")
 
-                                    # 计算并回调下载速度
-                                    current_time = time.time()
-                                    time_diff = current_time - last_time
+                                f.write(chunk)
+                                downloaded_size += len(chunk)
 
-                                    # 每秒更新一次下载速度
-                                    if time_diff >= 1.0:
-                                        speed = int((downloaded_size - last_size) / time_diff)
-                                        self._callback_group.speed(speed)
-                                        last_time = current_time
-                                        last_size = downloaded_size
-                                        
-                        except (IOError, OSError) as e:
-                            logger.error(f"文件写入失败: {file['path']} - {e}")
-                            raise DownloadException(
-                                f"文件写入失败: {e}", 
-                                CoreErrorCodes.FILE_PERMISSION_DENIED if "permission" in str(e).lower() 
-                                else CoreErrorCodes.FILESYSTEM_GENERAL_ERROR
-                            ) from e
+                                # 报告字节级进度
+                                self._callback_group.bytes_downloaded(downloaded_size, total_size)
+
+                                # 计算并回调下载进度
+                                if total_size > 0:
+                                    percentage = int((downloaded_size / total_size) * 100)
+                                    self._callback_group.progress(percentage)
+
+                                # 计算并回调下载速度
+                                current_time = time.time()
+                                time_diff = current_time - last_time
+
+                                # 每秒更新一次下载速度
+                                if time_diff >= 1.0:
+                                    speed = int((downloaded_size - last_size) / time_diff)
+                                    self._callback_group.speed(speed)
+                                    last_time = current_time
+                                    last_size = downloaded_size
+
+                    except (IOError, OSError) as e:
+                        logger.error(f"文件写入失败: {file['path']} - {e}")
+                        raise DownloadException(
+                            f"文件写入失败: {e}",
+                            CoreErrorCodes.FILE_PERMISSION_DENIED if "permission" in str(e).lower()
+                            else CoreErrorCodes.FILESYSTEM_GENERAL_ERROR
+                        ) from e
                             
             except httpx.HTTPStatusError as e:
                 error_msg = f"HTTP请求失败 [{e.response.status_code}]: {file['url']}"
@@ -268,20 +352,25 @@ class DownloadManager:
     def __init__(self,
                  callback_group: IDownloadMultiThread,
                  tasks: List[DownloadFile],
-                 concurrent_count: int = 5,
+                 concurrent_count: Optional[int] = None,
                  max_retries: int = 3,
                  ):
         """
         Args:
             callback_group: 上层回调组，接收聚合后的并发下载事件
             tasks: 下载任务列表
-            concurrent_count: 并发数量
+            concurrent_count: 并发数量，如果为None则自动计算最优值
             max_retries: 单个任务的最大重试次数，默认为3次
         """
         self._callback_group = callback_group
         self._tasks = tasks
-        self._concurrent_count = concurrent_count
         self._max_retries = max_retries
+
+        # 智能计算并发数量
+        if concurrent_count is None:
+            self._concurrent_count = self._calculate_optimal_concurrency()
+        else:
+            self._concurrent_count = concurrent_count
         
         # 任务状态跟踪 - 简单明了
         self._task_progress: Dict[str, int] = {}        # 各任务进度 0-100
@@ -296,6 +385,58 @@ class DownloadManager:
         self._is_cancelled = False
         self._completed_tasks = 0
         self._failed_tasks = 0
+
+    def _calculate_optimal_concurrency(self) -> int:
+        """计算最优并发数量
+
+        根据任务数量、文件大小等因素智能计算最优的并发数量。
+
+        Returns:
+            最优并发数量
+        """
+        task_count = len(self._tasks)
+
+        # 分析文件大小分布
+        total_size = 0
+        small_files = 0  # 小于1MB的文件
+        large_files = 0  # 大于10MB的文件
+
+        for task in self._tasks:
+            size = task.get("size", 0)
+            total_size += size
+
+            if size > 0:
+                if size < 1024 * 1024:  # 小于1MB
+                    small_files += 1
+                elif size > 10 * 1024 * 1024:  # 大于10MB
+                    large_files += 1
+
+        # 计算平均文件大小
+        avg_size = total_size / task_count if task_count > 0 else 0
+
+        # 根据文件特征计算并发数
+        if small_files > task_count * 0.8:  # 80%以上是小文件
+            # 小文件场景：可以使用更高的并发数
+            base_concurrency = min(20, task_count)
+            # 但要考虑总任务数，避免过度并发
+            if task_count > 100:
+                concurrency = min(30, task_count // 3)
+            else:
+                concurrency = base_concurrency
+        elif large_files > task_count * 0.5:  # 50%以上是大文件
+            # 大文件场景：使用较低的并发数避免带宽竞争
+            concurrency = min(5, task_count)
+        else:
+            # 混合场景：使用中等并发数
+            concurrency = min(10, task_count)
+
+        # 确保并发数在合理范围内
+        concurrency = max(1, min(concurrency, 50))
+
+        logger.info(f"智能计算并发数: {concurrency} (任务总数: {task_count}, "
+                   f"小文件: {small_files}, 大文件: {large_files}, 平均大小: {avg_size/1024:.1f}KB)")
+
+        return concurrency
 
     async def schedule(self) -> None:
         """
@@ -357,6 +498,10 @@ class DownloadManager:
                 await speed_monitor
             except asyncio.CancelledError:
                 pass
+
+            # 清理连接池（可选，在长时间不使用时）
+            # 注意：这里不主动关闭连接池，因为可能还有其他下载任务在使用
+            # 连接池会在程序退出时自动清理
 
     def _get_task_display_name(self, index: int, task: DownloadFile) -> str:
         """生成任务显示名称：task_id + 文件名"""
@@ -559,3 +704,128 @@ class DownloadManager:
         """取消所有下载"""
         logger.info("收到取消信号，正在停止所有下载任务")
         self._is_cancelled = True
+
+
+class BatchDownloadManager(DownloadManager):
+    """批量下载管理器
+
+    专门针对大量小文件下载场景优化的下载管理器。
+    通过批量处理、连接复用等技术提升下载性能。
+    """
+
+    def __init__(self,
+                 callback_group: IDownloadMultiThread,
+                 tasks: List[DownloadFile],
+                 concurrent_count: Optional[int] = None,
+                 max_retries: int = 3,
+                 batch_size: int = 10):
+        """
+        Args:
+            callback_group: 上层回调组，接收聚合后的并发下载事件
+            tasks: 下载任务列表
+            concurrent_count: 并发数量，如果为None则自动计算最优值
+            max_retries: 单个任务的最大重试次数，默认为3次
+            batch_size: 批处理大小，每批处理的文件数量
+        """
+        super().__init__(callback_group, tasks, concurrent_count, max_retries)
+        self.batch_size = batch_size
+
+        # 按主机分组任务，优化连接复用
+        self._tasks_by_host = self._group_tasks_by_host()
+
+    def _group_tasks_by_host(self) -> Dict[str, List[DownloadFile]]:
+        """按主机分组任务
+
+        将下载任务按目标主机分组，便于连接复用。
+
+        Returns:
+            按主机分组的任务字典
+        """
+        tasks_by_host = {}
+
+        for task in self._tasks:
+            url = task.get("url", "")
+            if url:
+                parsed = urlparse(url)
+                host_key = f"{parsed.scheme}://{parsed.netloc}"
+
+                if host_key not in tasks_by_host:
+                    tasks_by_host[host_key] = []
+                tasks_by_host[host_key].append(task)
+
+        logger.info(f"任务按主机分组完成，共 {len(tasks_by_host)} 个主机")
+        for host, host_tasks in tasks_by_host.items():
+            logger.debug(f"主机 {host}: {len(host_tasks)} 个任务")
+
+        return tasks_by_host
+
+    async def schedule(self) -> None:
+        """
+        调度执行所有下载任务（批量优化版本）
+        """
+        logger.info(f"开始批量下载任务，共 {len(self._tasks)} 个文件，并发数: {self._concurrent_count}")
+        self._callback_group.start()
+
+        # 创建信号量控制并发
+        semaphore = asyncio.Semaphore(self._concurrent_count)
+
+        # 按主机分批创建下载任务
+        download_tasks = []
+        task_index = 0
+
+        for host, host_tasks in self._tasks_by_host.items():
+            logger.debug(f"为主机 {host} 创建 {len(host_tasks)} 个下载任务")
+
+            # 将同一主机的任务分批处理
+            for i in range(0, len(host_tasks), self.batch_size):
+                batch = host_tasks[i:i + self.batch_size]
+
+                for task in batch:
+                    task_id = self._get_task_display_name(task_index, task)
+                    logger.debug(f"创建下载任务: {task_id}")
+                    download_task = asyncio.create_task(
+                        self._download_single_task(semaphore, task_id, task)
+                    )
+                    download_tasks.append(download_task)
+                    task_index += 1
+
+        # 启动速度监控
+        speed_monitor = asyncio.create_task(self._monitor_speed())
+
+        try:
+            # 等待所有任务完成
+            results = await asyncio.gather(*download_tasks, return_exceptions=True)
+
+            # 检查是否有任务抛出了异常
+            for i, result in enumerate(results):
+                if isinstance(result, Exception):
+                    task_id = self._get_task_display_name(i, self._tasks[i])
+                    logger.warning(f"任务 {task_id} 执行时发生异常: {result}")
+
+            # 检查最终状态 - 考虑重试机制
+            permanently_failed_count = sum(1 for failed in self._task_failed_permanently.values() if failed)
+
+            if permanently_failed_count > 0:
+                failed_tasks = [task_id for task_id, failed in self._task_failed_permanently.items() if failed]
+                error_msg = f"有 {permanently_failed_count} 个任务在重试{self._max_retries}次后仍然失败: {', '.join(failed_tasks)}"
+                logger.error(f"批量下载失败: {error_msg}")
+
+                # 创建聚合错误
+                aggregate_error = DownloadException(error_msg, CoreErrorCodes.DOWNLOAD_GENERAL_ERROR)
+                self._callback_group.error(aggregate_error)
+            else:
+                logger.info(f"所有批量下载任务完成，共 {len(self._tasks)} 个文件")
+                self._callback_group.finished()
+
+        except Exception as e:
+            logger.error(f"批量下载调度过程中发生未预期错误: {e}")
+            wrapped_error = WrappedSystemException(e, f"批量下载任务调度失败: {e}")
+            self._callback_group.error(wrapped_error)
+            raise wrapped_error
+
+        finally:
+            speed_monitor.cancel()
+            try:
+                await speed_monitor
+            except asyncio.CancelledError:
+                pass

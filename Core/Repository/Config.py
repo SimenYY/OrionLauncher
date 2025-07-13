@@ -20,3 +20,6 @@ class Config(Repository):
         TODO:保存配置文件
         """
         pass
+
+
+config = Config()
