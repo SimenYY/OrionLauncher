@@ -63,15 +63,83 @@ class InstallationsPage(QWidget):
         main_layout.setSpacing(20)
 
         # 创建标题
-        title_label = QLabel("安装管理")
-        title_label.setStyleSheet(
-            f"color: {ThemeManager().get("text")}; font-size: 24px; font-weight: bold; background: transparent;"
-        )
-        main_layout.addWidget(title_label)
+        self.title_label = QLabel("安装管理")
+        main_layout.addWidget(self.title_label)
 
         # 创建已安装版本列表
-        installed_frame = QFrame()
-        installed_frame.setStyleSheet(
+        self.installed_frame = QFrame()
+        installed_layout = QVBoxLayout(self.installed_frame)
+        installed_layout.setContentsMargins(20, 20, 20, 20)
+
+        # 创建已安装版本标题
+        self.installed_title = QLabel("已安装版本")
+
+        installed_layout.addWidget(self.installed_title)
+
+        # 创建已安装版本列表
+        self.installed_list = QListWidget()
+        installed_layout.addWidget(self.installed_list)
+
+        # 创建按钮布局
+        installed_buttons_layout = QHBoxLayout()
+
+        # 创建删除按钮
+        self.delete_button = QPushButton("删除")
+        self.delete_button.setEnabled(False)
+
+        # 创建启动按钮
+        self.launch_button = QPushButton("启动")
+        self.launch_button.setEnabled(False)
+
+        installed_buttons_layout.addWidget(self.delete_button)
+        installed_buttons_layout.addStretch(1)
+        installed_buttons_layout.addWidget(self.launch_button)
+
+        installed_layout.addLayout(installed_buttons_layout)
+
+        main_layout.addWidget(self.installed_frame)
+
+        # 创建安装新版本区域
+        self.install_frame = QFrame()
+        install_layout = QVBoxLayout(self.install_frame)
+        install_layout.setContentsMargins(20, 20, 20, 20)
+
+        # 创建安装新版本标题
+        self.install_title = QLabel("安装新版本")
+        install_layout.addWidget(self.install_title)
+
+        # 创建版本选择区域
+        version_layout = QHBoxLayout()
+        self.version_label = QLabel("选择版本:")
+        self.version_combo = QComboBox()
+
+        version_layout.addWidget(self.version_label)
+        version_layout.addWidget(self.version_combo)
+        version_layout.addStretch(1)
+
+        # 创建安装按钮
+        self.install_button = QPushButton("安装")
+        version_layout.addWidget(self.install_button)
+
+        install_layout.addLayout(version_layout)
+
+        # 创建进度条（默认隐藏）
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setVisible(False)
+        install_layout.addWidget(self.progress_bar)
+
+        main_layout.addWidget(self.install_frame)
+
+        # 添加UI样式
+        self._set_style_sheet()
+
+    def _set_style_sheet(self):
+        """设置/刷新所有UI组件样式"""
+        self.title_label.setStyleSheet(
+            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
+        )
+
+        self.installed_frame.setStyleSheet(
             f"""
             QFrame {{
                 background-color: {ThemeManager().get("qframe-background")};
@@ -79,18 +147,7 @@ class InstallationsPage(QWidget):
             }}
         """
         )
-        installed_layout = QVBoxLayout(installed_frame)
-        installed_layout.setContentsMargins(20, 20, 20, 20)
 
-        # 创建已安装版本标题
-        installed_title = QLabel("已安装版本")
-        installed_title.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
-        )
-        installed_layout.addWidget(installed_title)
-
-        # 创建已安装版本列表
-        self.installed_list = QListWidget()
         self.installed_list.setStyleSheet(
             f"""
             QListWidget {{
@@ -110,22 +167,16 @@ class InstallationsPage(QWidget):
             }}
             QListWidget::item:selected {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
             }}
         """
         )
-        installed_layout.addWidget(self.installed_list)
 
-        # 创建按钮布局
-        installed_buttons_layout = QHBoxLayout()
-
-        # 创建删除按钮
-        self.delete_button = QPushButton("删除")
         self.delete_button.setStyleSheet(
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("negative-selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
@@ -139,15 +190,12 @@ class InstallationsPage(QWidget):
             }}
         """
         )
-        self.delete_button.setEnabled(False)
 
-        # 创建启动按钮
-        self.launch_button = QPushButton("启动")
         self.launch_button.setStyleSheet(
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme_text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
@@ -161,19 +209,8 @@ class InstallationsPage(QWidget):
             }}
         """
         )
-        self.launch_button.setEnabled(False)
 
-        installed_buttons_layout.addWidget(self.delete_button)
-        installed_buttons_layout.addStretch(1)
-        installed_buttons_layout.addWidget(self.launch_button)
-
-        installed_layout.addLayout(installed_buttons_layout)
-
-        main_layout.addWidget(installed_frame)
-
-        # 创建安装新版本区域
-        install_frame = QFrame()
-        install_frame.setStyleSheet(
+        self.install_frame.setStyleSheet(
             f"""
             QFrame {{
                 background-color: {ThemeManager().get("qframe-background")};
@@ -181,23 +218,19 @@ class InstallationsPage(QWidget):
             }}
         """
         )
-        install_layout = QVBoxLayout(install_frame)
-        install_layout.setContentsMargins(20, 20, 20, 20)
 
-        # 创建安装新版本标题
-        install_title = QLabel("安装新版本")
-        install_title.setStyleSheet(
+        self.install_title.setStyleSheet(
             f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
         )
-        install_layout.addWidget(install_title)
 
-        # 创建版本选择区域
-        version_layout = QHBoxLayout()
-        version_label = QLabel("选择版本:")
-        version_label.setStyleSheet(
+        self.installed_title.setStyleSheet(
+            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
+        )
+
+        self.version_label.setStyleSheet(
             f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
-        self.version_combo = QComboBox()
+
         self.version_combo.setStyleSheet(
             f"""
             QComboBox {{
@@ -221,17 +254,11 @@ class InstallationsPage(QWidget):
         """
         )
 
-        version_layout.addWidget(version_label)
-        version_layout.addWidget(self.version_combo)
-        version_layout.addStretch(1)
-
-        # 创建安装按钮
-        self.install_button = QPushButton("安装")
         self.install_button.setStyleSheet(
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
@@ -245,12 +272,7 @@ class InstallationsPage(QWidget):
             }}
         """
         )
-        version_layout.addWidget(self.install_button)
 
-        install_layout.addLayout(version_layout)
-
-        # 创建进度条（默认隐藏）
-        self.progress_bar = QProgressBar()
         self.progress_bar.setStyleSheet(
             f"""
             QProgressBar {{
@@ -265,10 +287,6 @@ class InstallationsPage(QWidget):
             }}
         """
         )
-        self.progress_bar.setVisible(False)
-        install_layout.addWidget(self.progress_bar)
-
-        main_layout.addWidget(install_frame)
 
     def _connect_signals(self):
         """连接信号槽"""
@@ -286,6 +304,9 @@ class InstallationsPage(QWidget):
 
         # 列表信号
         self.installed_list.itemSelectionChanged.connect(self._handle_selection_changed)
+
+        # UI刷新信号
+        ThemeManager().updated.connect(self._set_style_sheet)
 
     @Slot(list)
     def _handle_version_list_updated(self, versions: List[Dict[str, Any]]):

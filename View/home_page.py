@@ -69,42 +69,65 @@ class HomePage(QWidget):
         main_layout.setSpacing(20)
 
         # 创建顶部区域
-        top_frame = QFrame()
-        top_frame.setStyleSheet(
-            f"""
-            QFrame {{
-                background-color: {ThemeManager().get("home-window-background")};
-                border-radius: 8px;
-            }}
-        """
-        )
-        top_layout = QVBoxLayout(top_frame)
+        self.top_frame = QFrame()
+        top_layout = QVBoxLayout(self.top_frame)
         top_layout.setContentsMargins(20, 20, 20, 20)
 
         # 创建标题
-        title_label = QLabel("Orion's Tip of the Day")
-        title_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
-        )
-        top_layout.addWidget(title_label)
+        self.title_label = QLabel("Orion's Tip of the Day")
+        top_layout.addWidget(self.title_label)
 
         # 创建提示内容
-        tip_label = QLabel("Getting a fresh tip for you...")
-        tip_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
-        )
-        tip_label.setWordWrap(True)
-        top_layout.addWidget(tip_label)
+        self.tip_label = QLabel("Getting a fresh tip for you...")
+        self.tip_label.setWordWrap(True)
+        top_layout.addWidget(self.tip_label)
 
         # 添加顶部区域到主布局
-        main_layout.addWidget(top_frame)
+        main_layout.addWidget(self.top_frame)
 
         # 添加弹性空间
         main_layout.addStretch(1)
 
         # 创建底部控制区域
-        bottom_frame = QFrame()
-        bottom_frame.setStyleSheet(
+        self.bottom_frame = QFrame()
+        bottom_layout = QVBoxLayout(self.bottom_frame)
+        bottom_layout.setContentsMargins(20, 20, 20, 20)
+        bottom_layout.setSpacing(15)
+
+        # 创建版本选择区域
+        version_layout = QHBoxLayout()
+        self.version_label = QLabel("游戏版本:")
+        self.version_combo = QComboBox()
+
+        version_layout.addWidget(self.version_label)
+        version_layout.addWidget(self.version_combo)
+        version_layout.addStretch(1)
+
+        # 创建版本信息标签
+        self.version_info = QLabel("Latest Release - 1.21")
+        version_layout.addWidget(self.version_info)
+
+        bottom_layout.addLayout(version_layout)
+
+        # 创建启动按钮
+        self.play_button = QPushButton("PLAY")
+        self.play_button.setMinimumHeight(50)
+        bottom_layout.addWidget(self.play_button)
+
+        # 创建进度条（默认隐藏）
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setMinimumHeight(50)
+        self.progress_bar.setVisible(False)
+        bottom_layout.addWidget(self.progress_bar)
+
+        main_layout.addWidget(self.bottom_frame)
+
+        # 添加UI样式
+        self._set_style_sheet()
+
+    def _set_style_sheet(self):
+        """设置/刷新所有UI组件样式"""
+        self.top_frame.setStyleSheet(
             f"""
             QFrame {{
                 background-color: {ThemeManager().get("home-window-background")};
@@ -112,17 +135,24 @@ class HomePage(QWidget):
             }}
         """
         )
-        bottom_layout = QVBoxLayout(bottom_frame)
-        bottom_layout.setContentsMargins(20, 20, 20, 20)
-        bottom_layout.setSpacing(15)
 
-        # 创建版本选择区域
-        version_layout = QHBoxLayout()
-        version_label = QLabel("游戏版本:")
-        version_label.setStyleSheet(
+        self.title_label.setStyleSheet(
+            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
+        )
+
+        self.bottom_frame.setStyleSheet(
+            f"""
+            QFrame {{
+                background-color: {ThemeManager().get("home-window-background")};
+                border-radius: 8px;
+            }}
+        """
+        )
+
+        self.version_label.setStyleSheet(
             f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
-        self.version_combo = QComboBox()
+
         self.version_combo.setStyleSheet(
             f"""
             QComboBox {{
@@ -146,26 +176,15 @@ class HomePage(QWidget):
         """
         )
 
-        version_layout.addWidget(version_label)
-        version_layout.addWidget(self.version_combo)
-        version_layout.addStretch(1)
-
-        # 创建版本信息标签
-        self.version_info = QLabel("Latest Release - 1.21")
         self.version_info.setStyleSheet(
             f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
-        version_layout.addWidget(self.version_info)
 
-        bottom_layout.addLayout(version_layout)
-
-        # 创建启动按钮
-        self.play_button = QPushButton("PLAY")
         self.play_button.setStyleSheet(
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme_text")};
                 border-radius: 4px;
                 padding: 15px;
                 font-size: 18px;
@@ -180,11 +199,7 @@ class HomePage(QWidget):
             }}
         """
         )
-        self.play_button.setMinimumHeight(50)
-        bottom_layout.addWidget(self.play_button)
 
-        # 创建进度条（默认隐藏）
-        self.progress_bar = QProgressBar()
         self.progress_bar.setStyleSheet(
             f"""
             QProgressBar {{
@@ -199,11 +214,10 @@ class HomePage(QWidget):
             }}
         """
         )
-        self.progress_bar.setMinimumHeight(50)
-        self.progress_bar.setVisible(False)
-        bottom_layout.addWidget(self.progress_bar)
 
-        main_layout.addWidget(bottom_frame)
+        self.tip_label.setStyleSheet(
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+        )
 
     def _connect_signals(self):
         """连接信号槽"""
@@ -222,6 +236,9 @@ class HomePage(QWidget):
 
         # 版本选择信号
         self.version_combo.currentIndexChanged.connect(self._handle_version_changed)
+
+        # UI刷新信号
+        ThemeManager().updated.connect(self._set_style_sheet)
 
     @Slot(list)
     def _handle_version_list_updated(self, versions: List[Dict[str, Any]]):

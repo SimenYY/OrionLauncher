@@ -43,16 +43,6 @@ class LoginDialog(QDialog):
         self.setMinimumSize(400, 300)
         self.setModal(True)
 
-        # 设置窗口样式
-        self.setStyleSheet(
-            f"""
-            QDialog {{
-                background-color: {ThemeManager().get("qdialog-background")};
-                border-radius: 10px;
-            }}
-        """
-        )
-
         # 初始化UI
         self._init_ui()
 
@@ -67,31 +57,87 @@ class LoginDialog(QDialog):
         main_layout.setSpacing(20)
 
         # 创建标题
-        title_label = QLabel("登录您的账户")
-        title_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 20px; font-weight: bold; background: transparent;"
-        )
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        main_layout.addWidget(title_label)
+        self.title_label = QLabel("登录您的账户")
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        main_layout.addWidget(self.title_label)
 
         # 创建表单
-        form_frame = QFrame()
-        form_frame.setStyleSheet(
+        self.form_frame = QFrame()
+        form_layout = QVBoxLayout(self.form_frame)
+        form_layout.setContentsMargins(20, 20, 20, 20)
+        form_layout.setSpacing(15)
+
+        # 用户名输入
+        self.username_label = QLabel("用户名:")
+        self.username_edit = QLineEdit()
+        self.username_edit.setPlaceholderText("输入您的用户名")
+        form_layout.addWidget(self.username_label)
+        form_layout.addWidget(self.username_edit)
+
+        # 密码输入
+        self.password_label = QLabel("密码:")
+        self.password_edit = QLineEdit()
+        self.password_edit.setPlaceholderText("输入您的密码")
+        self.password_edit.setEchoMode(QLineEdit.EchoMode.Password)
+        form_layout.addWidget(self.password_label)
+        form_layout.addWidget(self.password_edit)
+
+        # 添加表单到主布局
+        main_layout.addWidget(self.form_frame)
+
+        # 创建错误信息标签（默认隐藏）
+        self.error_label = QLabel()
+        self.error_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.error_label.setVisible(False)
+        main_layout.addWidget(self.error_label)
+
+        # 添加弹性空间
+        main_layout.addStretch(1)
+
+        # 创建按钮布局
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(10)
+
+        # 取消按钮
+        self.cancel_button = QPushButton("取消")
+
+        # 登录按钮
+        self.login_button = QPushButton("登录")
+
+        button_layout.addWidget(self.cancel_button)
+        button_layout.addWidget(self.login_button)
+
+        main_layout.addLayout(button_layout)
+
+        # 添加UI样式
+        self._set_style_sheet()
+
+    def _set_style_sheet(self):
+        """设置/刷新所有UI组件样式"""
+        self.setStyleSheet(
+            f"""
+            QDialog {{
+                background-color: {ThemeManager().get("qdialog-background")};
+                border-radius: 10px;
+            }}
+        """
+        )
+
+        self.title_label.setStyleSheet(
+            f"color: {ThemeManager().get("title")}; font-size: 20px; font-weight: bold; background: transparent;"
+        )
+
+        self.form_frame.setStyleSheet(
             f"""
             background-color: {ThemeManager().get("qframe-background")};
             border-radius: 8px;
         """
         )
-        form_layout = QVBoxLayout(form_frame)
-        form_layout.setContentsMargins(20, 20, 20, 20)
-        form_layout.setSpacing(15)
 
-        # 用户名输入
-        username_label = QLabel("用户名:")
-        username_label.setStyleSheet(
+        self.username_label.setStyleSheet(
             f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
-        self.username_edit = QLineEdit()
+
         self.username_edit.setStyleSheet(
             f"""
             QLineEdit {{
@@ -106,16 +152,11 @@ class LoginDialog(QDialog):
             }}
         """
         )
-        self.username_edit.setPlaceholderText("输入您的用户名")
-        form_layout.addWidget(username_label)
-        form_layout.addWidget(self.username_edit)
 
-        # 密码输入
-        password_label = QLabel("密码:")
-        password_label.setStyleSheet(
+        self.password_label.setStyleSheet(
             f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
-        self.password_edit = QLineEdit()
+
         self.password_edit.setStyleSheet(
             f"""
             QLineEdit {{
@@ -130,32 +171,11 @@ class LoginDialog(QDialog):
             }}
         """
         )
-        self.password_edit.setPlaceholderText("输入您的密码")
-        self.password_edit.setEchoMode(QLineEdit.EchoMode.Password)
-        form_layout.addWidget(password_label)
-        form_layout.addWidget(self.password_edit)
 
-        # 添加表单到主布局
-        main_layout.addWidget(form_frame)
-
-        # 创建错误信息标签（默认隐藏）
-        self.error_label = QLabel()
         self.error_label.setStyleSheet(
             f"color: {ThemeManager().get("negative-selection-background")}; font-size: 14px; background: transparent;"
         )
-        self.error_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.error_label.setVisible(False)
-        main_layout.addWidget(self.error_label)
 
-        # 添加弹性空间
-        main_layout.addStretch(1)
-
-        # 创建按钮布局
-        button_layout = QHBoxLayout()
-        button_layout.setSpacing(10)
-
-        # 取消按钮
-        self.cancel_button = QPushButton("取消")
         self.cancel_button.setStyleSheet(
             f"""
             QPushButton {{
@@ -171,13 +191,11 @@ class LoginDialog(QDialog):
         """
         )
 
-        # 登录按钮
-        self.login_button = QPushButton("登录")
         self.login_button.setStyleSheet(
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
@@ -191,11 +209,6 @@ class LoginDialog(QDialog):
             }}
         """
         )
-
-        button_layout.addWidget(self.cancel_button)
-        button_layout.addWidget(self.login_button)
-
-        main_layout.addLayout(button_layout)
 
     def _connect_signals(self):
         """连接信号槽"""

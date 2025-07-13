@@ -51,27 +51,10 @@ class ProgressDialog(QDialog):
 
         # 创建任务标签
         self.task_label = QLabel("正在处理...")
-        self.task_label.setStyleSheet(
-            f"color: {ThemeManager().get("text")}; font-size: 16px; background: transparent;"
-        )
         main_layout.addWidget(self.task_label)
 
         # 创建进度条
         self.progress_bar = QProgressBar()
-        self.progress_bar.setStyleSheet(
-            f"""
-            QProgressBar {{
-                background-color: {ThemeManager().get("progress-bar-background")};
-                color: {ThemeManager().get("text")};
-                border-radius: 4px;
-                text-align: center;
-            }}
-            QProgressBar::chunk {{
-                background-color: {ThemeManager().get("progress-bar")};
-                border-radius: 4px;
-            }}
-        """
-        )
         self.progress_bar.setMinimum(0)
         self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(0)
@@ -79,9 +62,6 @@ class ProgressDialog(QDialog):
 
         # 创建详细信息标签
         self.detail_label = QLabel()
-        self.detail_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 12px; background: transparent;"
-        )
         self.detail_label.setWordWrap(True)
         main_layout.addWidget(self.detail_label)
 
@@ -97,6 +77,38 @@ class ProgressDialog(QDialog):
 
         # 创建取消按钮
         self.cancel_button = QPushButton("取消")
+        button_layout.addWidget(self.cancel_button)
+
+        main_layout.addLayout(button_layout)
+
+        # 添加UI样式
+        self._set_style_sheet()
+
+    def _set_style_sheet(self):
+        """设置/刷新所有UI组件样式"""
+        self.task_label.setStyleSheet(
+            f"color: {ThemeManager().get("text")}; font-size: 16px; background: transparent;"
+        )
+
+        self.progress_bar.setStyleSheet(
+            f"""
+            QProgressBar {{
+                background-color: {ThemeManager().get("progress-bar-background")};
+                color: {ThemeManager().get("text")};
+                border-radius: 4px;
+                text-align: center;
+            }}
+            QProgressBar::chunk {{
+                background-color: {ThemeManager().get("progress-bar")};
+                border-radius: 4px;
+            }}
+        """
+        )
+
+        self.detail_label.setStyleSheet(
+            f"color: {ThemeManager().get("label")}; font-size: 12px; background: transparent;"
+        )
+
         self.cancel_button.setStyleSheet(
             f"""
             QPushButton {{
@@ -111,9 +123,6 @@ class ProgressDialog(QDialog):
             }}
         """
         )
-        button_layout.addWidget(self.cancel_button)
-
-        main_layout.addLayout(button_layout)
 
     def set_task(self, task_name: str):
         """

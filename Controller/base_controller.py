@@ -91,9 +91,13 @@ class BaseController(QObject):
                 )
         """
         # 如果已经有同名任务在运行，先停止它
-        if task_name in self._threads and self._threads[task_name].isRunning():
-            self._threads[task_name].quit()
-            self._threads[task_name].wait()
+        try:
+            if task_name in self._threads and self._threads[task_name].isRunning():
+                self._threads[task_name].quit()
+                self._threads[task_name].wait()
+        except RuntimeError:
+            # 同名任务已经被其他组件删掉了
+            del self._threads[task_name]
 
         # 创建工作线程
         thread = QThread()
