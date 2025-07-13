@@ -122,6 +122,80 @@ class IInstallAddon(Protocol):
         """任务错误信号，传递错误"""
 
 
+class IAccountLogin(Protocol):
+    """
+    账号登录信号
+    """
+    def start(self):
+        """登录开始信号"""
+    def authenticating(self):
+        """正在进行身份验证"""
+    def waiting_user_input(self, message: str):
+        """等待用户输入（如验证码、授权等）"""
+    def progress(self, step: str, current: int, total: int):
+        """登录进度，step为当前步骤描述"""
+    def success(self, username: str, uuid: str, access_token: str):
+        """登录成功，返回用户名、UUID和访问令牌"""
+    def finished(self):
+        """登录流程完成信号"""
+    def error(self, error: Exception):
+        """登录错误信号，传递错误"""
+
+
+class IAccountRefresh(Protocol):
+    """
+    账号令牌刷新信号
+    """
+    def start(self):
+        """刷新开始信号"""
+    def validating(self):
+        """正在验证当前令牌"""
+    def refreshing(self):
+        """正在刷新令牌"""
+    def success(self, access_token: str, expires_in: int):
+        """刷新成功，返回新令牌和过期时间"""
+    def finished(self):
+        """刷新完成信号"""
+    def error(self, error: Exception):
+        """刷新错误信号，传递错误"""
+
+
+class IAccountLogout(Protocol):
+    """
+    账号登出信号
+    """
+    def start(self):
+        """登出开始信号"""
+    def revoking_token(self):
+        """正在撤销令牌"""
+    def clearing_cache(self):
+        """正在清理缓存"""
+    def finished(self):
+        """登出完成信号"""
+    def error(self, error: Exception):
+        """登出错误信号，传递错误"""
+
+
+class IAccountValidation(Protocol):
+    """
+    账号验证信号
+    """
+    def start(self):
+        """验证开始信号"""
+    def checking_token(self):
+        """正在检查令牌有效性"""
+    def checking_profile(self):
+        """正在检查用户档案"""
+    def valid(self, username: str, uuid: str):
+        """验证通过，返回用户信息"""
+    def invalid(self, reason: str):
+        """验证失败，返回失败原因"""
+    def finished(self):
+        """验证完成信号"""
+    def error(self, error: Exception):
+        """验证错误信号，传递错误"""
+
+
 class InstallationCallbackGroup(CallbackGroup):
     """
     类型化的安装器回调组
@@ -160,4 +234,46 @@ class InstallationCallbackGroup(CallbackGroup):
 
     def __getattr__(self, name: str) -> Any:
         return super().__getattr__(name)
-        
+
+
+class AccountCallbackGroup(CallbackGroup):
+    """
+    类型化的账号管理回调组
+
+    支持多种账号操作的回调管理：
+    - login: 账号登录流程
+    - refresh: 令牌刷新流程
+    - logout: 账号登出流程
+    - validation: 账号验证流程
+
+    使用示例:
+        callbacks = AccountCallbackGroup(
+            login=Callbacks(
+                start=lambda: print("开始登录"),
+                success=lambda username, uuid, token: print(f"登录成功: {username}"),
+                error=lambda e: print(f"登录失败: {e}")
+            ),
+            refresh=Callbacks(
+                start=lambda: print("开始刷新令牌"),
+                success=lambda token, expires: print("令牌刷新成功")
+            )
+        )
+    """
+    @overload
+    def __getattr__(self, name: Literal["login"]) -> IAccountLogin:
+        ...
+
+    @overload
+    def __getattr__(self, name: Literal["refresh"]) -> IAccountRefresh:
+        ...
+
+    @overload
+    def __getattr__(self, name: Literal["logout"]) -> IAccountLogout:
+        ...
+
+    @overload
+    def __getattr__(self, name: Literal["validation"]) -> IAccountValidation:
+        ...
+
+    def __getattr__(self, name: str) -> Any:
+        return super().__getattr__(name)
