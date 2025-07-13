@@ -6,14 +6,16 @@
 - 仓库模块：配置和路径管理
 - 版本模块：Minecraft版本管理
 - 用户模块：用户账户管理
+- 安装模块：Minecraft安装调度和管理
 
 子模块:
     Repository: 仓库管理模块
     request: 网络请求模块
     version: 版本管理模块
     user: 用户管理模块
+    Installation: 安装调度模块
 """
 
-from . import Repository, request, user, version
+from . import Repository, request, user, version, Installation
 
-__all__ = ["Repository", "request", "version", "user"]
+__all__ = ["Repository", "request", "version", "user", "Installation"]
