@@ -195,7 +195,7 @@ class LoginDialog(QDialog):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;

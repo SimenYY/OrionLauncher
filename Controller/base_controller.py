@@ -96,6 +96,7 @@ class BaseController(QObject):
                 self._threads[task_name].quit()
                 self._threads[task_name].wait()
         except RuntimeError:
+            # 同名任务已经被其他组件删掉了
             del self._threads[task_name]
 
         # 创建工作线程
