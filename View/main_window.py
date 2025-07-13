@@ -26,7 +26,6 @@ from .installations_page import InstallationsPage
 from .settings_page import SettingsPage
 from .login_dialog import LoginDialog
 from .theme_manager import ThemeManager
-from Utils.tools import delete_layout
 
 
 class MainWindow(QMainWindow):
@@ -119,11 +118,7 @@ class MainWindow(QMainWindow):
 
     def _set_background_overlay(self):
         """设置背景图片透明度"""
-        opacity = ThemeManager().get_background_opacity()
         self.bg_mask_label = QLabel(self)
-        self.bg_mask_label.setStyleSheet(
-            f"background-color: rgba(255, 255, 255, {int(255 * opacity)})"
-        )
         self.bg_mask_label.setAttribute(
             Qt.WA_TransparentForMouseEvents
         )  # Allows clicks to pass through
@@ -162,6 +157,9 @@ class MainWindow(QMainWindow):
         # 创建页面
         self._create_pages()
 
+        # 添加UI样式
+        self._set_style_sheet()
+
     def _create_sidebar(self) -> QWidget:
         """
         创建侧边栏
@@ -172,14 +170,6 @@ class MainWindow(QMainWindow):
         # 创建侧边栏容器
         sidebar = QFrame()
         sidebar.setObjectName("sidebar")
-        sidebar.setStyleSheet(
-            f"""
-            #sidebar {{
-                background-color: {ThemeManager().get("sidebar-background")};
-                border-right: 1px solid {ThemeManager().get("sidebar-border")};
-            }}
-        """
-        )
 
         # 创建侧边栏布局
         sidebar_layout = QVBoxLayout(sidebar)
@@ -187,11 +177,8 @@ class MainWindow(QMainWindow):
         sidebar_layout.setSpacing(10)
 
         # 创建标题
-        logo_label = QLabel("Orion Launcher")
-        logo_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
-        )
-        sidebar_layout.addWidget(logo_label)
+        self.logo_label = QLabel("Orion Launcher")
+        sidebar_layout.addWidget(self.logo_label)
 
         # 添加间隔
         sidebar_layout.addSpacing(20)
@@ -210,27 +197,10 @@ class MainWindow(QMainWindow):
 
         # 创建用户信息区域
         self.user_info = QLabel("未登录")
-        self.user_info.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
-        )
         sidebar_layout.addWidget(self.user_info)
 
         # 创建登录/登出按钮
         self.login_btn = QPushButton("登录")
-        self.login_btn.setStyleSheet(
-            f"""
-            QPushButton {{
-                background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("theme_text")};
-                border-radius: 4px;
-                padding: 8px;
-                font-size: 14px;
-            }}
-            QPushButton:hover {{
-                background-color: {ThemeManager().get("selection-hover")};
-            }}
-        """
-        )
         sidebar_layout.addWidget(self.login_btn)
 
         return sidebar
@@ -249,8 +219,60 @@ class MainWindow(QMainWindow):
         btn = QPushButton(text)
         btn.setObjectName(f"nav_{name}")
         btn.setCheckable(True)
-        btn.setStyleSheet(
+        return btn
+
+    def _create_pages(self):
+        """创建页面"""
+        # 首页
+        if getattr(self, "home_page", None) is None:
+            self.home_page = HomePage(self.game_controller, self.account_controller)
+        self.content_stack.addWidget(self.home_page)
+
+        # 安装管理页
+        if getattr(self, "installations_page", None) is None:
+            self.installations_page = InstallationsPage(self.game_controller)
+        self.content_stack.addWidget(self.installations_page)
+
+        # 设置页
+        if getattr(self, "settings_page", None) is None:
+            self.settings_page = SettingsPage(self.settings_controller)
+        self.content_stack.addWidget(self.settings_page)
+
+    def _set_style_sheet(self):
+        """设置/刷新所有UI组件样式"""
+        self.sidebar.setStyleSheet(
             f"""
+            #sidebar {{
+                background-color: {ThemeManager().get("sidebar-background")};
+                border-right: 1px solid {ThemeManager().get("sidebar-border")};
+            }}
+        """
+        )
+
+        self.logo_label.setStyleSheet(
+            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
+        )
+
+        self.user_info.setStyleSheet(
+            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+        )
+
+        self.login_btn.setStyleSheet(
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("selection-background")};
+                color: {ThemeManager().get("theme_text")};
+                border-radius: 4px;
+                padding: 8px;
+                font-size: 14px;
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("selection-hover")};
+            }}
+        """
+        )
+
+        nav_btn_style = f"""
             QPushButton {{
                 background-color: transparent;
                 color: {ThemeManager().get("label")};
@@ -270,25 +292,13 @@ class MainWindow(QMainWindow):
                 font-weight: bold;
             }}
         """
+        self.home_btn.setStyleSheet(nav_btn_style)
+        self.installations_btn.setStyleSheet(nav_btn_style)
+        self.settings_btn.setStyleSheet(nav_btn_style)
+
+        self.bg_mask_label.setStyleSheet(
+            f"background-color: rgba(255, 255, 255, {int(255 * ThemeManager().get_background_opacity())})"
         )
-        return btn
-
-    def _create_pages(self):
-        """创建页面"""
-        # 首页
-        if getattr(self, "home_page", None) is None:
-            self.home_page = HomePage(self.game_controller, self.account_controller)
-        self.content_stack.addWidget(self.home_page)
-
-        # 安装管理页
-        if getattr(self, "installations_page", None) is None:
-            self.installations_page = InstallationsPage(self.game_controller)
-        self.content_stack.addWidget(self.installations_page)
-
-        # 设置页
-        if getattr(self, "settings_page", None) is None:
-            self.settings_page = SettingsPage(self.settings_controller)
-        self.content_stack.addWidget(self.settings_page)
 
     def _init_controllers(self):
         """初始化控制器"""
@@ -311,17 +321,7 @@ class MainWindow(QMainWindow):
         self.account_controller.logout_completed.connect(self._handle_logout_completed)
 
         # UI刷新信号
-        ThemeManager().updated.connect(self._refresh_ui)
-
-    def _refresh_ui(self):
-        """刷新所有UI组件"""
-        delete_layout(self.layout())
-        self.bg_mask_label.deleteLater()
-        self._set_background()
-        self._init_ui()
-        self._connect_signals()
-        # 默认回到设置页面
-        self._switch_page(2)
+        ThemeManager().updated.connect(self._set_style_sheet)
 
     def resizeEvent(self, event):
         """
