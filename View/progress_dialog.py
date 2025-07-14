@@ -87,7 +87,7 @@ class ProgressDialog(QDialog):
     def _set_style_sheet(self):
         """设置/刷新所有UI组件样式"""
         self.task_label.setStyleSheet(
-            f"color: {ThemeManager().get("text")}; font-size: 16px; background: transparent;"
+            f"color: {ThemeManager().get('text')}; font-size: 16px; background: transparent;"
         )
 
         self.progress_bar.setStyleSheet(
@@ -106,7 +106,7 @@ class ProgressDialog(QDialog):
         )
 
         self.detail_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 12px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 12px; background: transparent;"
         )
 
         self.cancel_button.setStyleSheet(

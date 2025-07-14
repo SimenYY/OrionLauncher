@@ -136,7 +136,7 @@ class InstallationsPage(QWidget):
     def _set_style_sheet(self):
         """设置/刷新所有UI组件样式"""
         self.title_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 24px; font-weight: bold; background: transparent;"
         )
 
         self.installed_frame.setStyleSheet(
@@ -220,15 +220,15 @@ class InstallationsPage(QWidget):
         )
 
         self.install_title.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 18px; font-weight: bold; background: transparent;"
         )
 
         self.installed_title.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 18px; font-weight: bold; background: transparent;"
         )
 
         self.version_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
         self.version_combo.setStyleSheet(

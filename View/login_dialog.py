@@ -124,7 +124,7 @@ class LoginDialog(QDialog):
         )
 
         self.title_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 20px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 20px; font-weight: bold; background: transparent;"
         )
 
         self.form_frame.setStyleSheet(
@@ -135,7 +135,7 @@ class LoginDialog(QDialog):
         )
 
         self.username_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
         self.username_edit.setStyleSheet(
@@ -154,7 +154,7 @@ class LoginDialog(QDialog):
         )
 
         self.password_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
         self.password_edit.setStyleSheet(
@@ -173,7 +173,7 @@ class LoginDialog(QDialog):
         )
 
         self.error_label.setStyleSheet(
-            f"color: {ThemeManager().get("negative-selection-background")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('negative-selection-background')}; font-size: 14px; background: transparent;"
         )
 
         self.cancel_button.setStyleSheet(
