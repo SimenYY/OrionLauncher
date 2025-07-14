@@ -35,7 +35,7 @@ class LocaleManager(QObject):
         self.set_locale(self._locale)
 
     def set_locale(self, locale_code):
-        path = os.path.join("locales", f"{locale_code}.json")
+        path = os.path.join(os.path.dirname(__file__), "../locales", f"{locale_code}.json")
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
                 self._translations = json.load(f)
