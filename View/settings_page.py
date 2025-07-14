@@ -24,6 +24,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Slot
 
 from Controller import SettingsController
+
+from Utils.locale_manager import LocaleManager
 from .theme_manager import ThemeManager
 
 
@@ -97,9 +99,13 @@ class SettingsPage(QWidget):
         # 添加UI样式
         self._set_style_sheet()
 
+        # 添加UI文字
+        self._set_text()
+
     def _on_save_button_click(self):
         # 处理主题切换
         ThemeManager().setTheme(self.theme_combo.currentData())
+        LocaleManager().set_locale(self.language_combo.currentData())
 
     def _create_game_tab(self) -> QWidget:
         """
@@ -115,8 +121,8 @@ class SettingsPage(QWidget):
 
         # 创建游戏路径设置
         self.path_group = QGroupBox("游戏路径")
-        path_layout = QFormLayout(self.path_group)
-        path_layout.setSpacing(10)
+        self.path_layout = QFormLayout(self.path_group)
+        self.path_layout.setSpacing(10)
 
         # Minecraft 目录
         minecraft_layout = QHBoxLayout()
@@ -124,7 +130,7 @@ class SettingsPage(QWidget):
         self.minecraft_dir_button = QPushButton("浏览...")
         minecraft_layout.addWidget(self.minecraft_dir_edit)
         minecraft_layout.addWidget(self.minecraft_dir_button)
-        path_layout.addRow("Minecraft 目录:", minecraft_layout)
+        self.path_layout.addRow("Minecraft 目录:", minecraft_layout)
 
         # Java 路径
         java_layout = QHBoxLayout()
@@ -132,14 +138,14 @@ class SettingsPage(QWidget):
         self.java_path_button = QPushButton("浏览...")
         java_layout.addWidget(self.java_path_edit)
         java_layout.addWidget(self.java_path_button)
-        path_layout.addRow("Java 路径:", java_layout)
+        self.path_layout.addRow("Java 路径:", java_layout)
 
         layout.addWidget(self.path_group)
 
         # 创建游戏设置
         self.game_group = QGroupBox("游戏设置")
-        game_layout = QFormLayout(self.game_group)
-        game_layout.setSpacing(10)
+        self.game_layout = QFormLayout(self.game_group)
+        self.game_layout.setSpacing(10)
 
         # 最大内存
         self.max_memory_spin = QSpinBox()
@@ -148,11 +154,11 @@ class SettingsPage(QWidget):
         self.max_memory_spin.setSingleStep(512)
         self.max_memory_spin.setValue(2048)
         self.max_memory_spin.setSuffix(" MB")
-        game_layout.addRow("最大内存:", self.max_memory_spin)
+        self.game_layout.addRow("最大内存:", self.max_memory_spin)
 
         # JVM 参数
         self.jvm_args_edit = QLineEdit()
-        game_layout.addRow("JVM 参数:", self.jvm_args_edit)
+        self.game_layout.addRow("JVM 参数:", self.jvm_args_edit)
 
         # 分辨率
         resolution_layout = QHBoxLayout()
@@ -177,7 +183,7 @@ class SettingsPage(QWidget):
         resolution_layout.addWidget(self.fullscreen_check)
         resolution_layout.addStretch(1)
 
-        game_layout.addRow("分辨率:", resolution_layout)
+        self.game_layout.addRow("分辨率:", resolution_layout)
 
         layout.addWidget(self.game_group)
 
@@ -200,14 +206,14 @@ class SettingsPage(QWidget):
 
         # 创建启动器设置
         self.launcher_group = QGroupBox("启动器设置")
-        launcher_layout = QFormLayout(self.launcher_group)
-        launcher_layout.setSpacing(10)
+        self.launcher_layout = QFormLayout(self.launcher_group)
+        self.launcher_layout.setSpacing(10)
 
         # 语言
         self.language_combo = QComboBox()
         self.language_combo.addItem("简体中文", "zh_CN")
         self.language_combo.addItem("English", "en_US")
-        launcher_layout.addRow("语言:", self.language_combo)
+        self.launcher_layout.addRow("语言:", self.language_combo)
 
         # 主题
         self.theme_combo = QComboBox()
@@ -223,17 +229,17 @@ class SettingsPage(QWidget):
             case _:
                 self.theme_combo.addItem("深色", "dark")
                 self.theme_combo.addItem("浅色", "light")
-        launcher_layout.addRow("主题:", self.theme_combo)
+        self.launcher_layout.addRow("主题:", self.theme_combo)
 
         # 检查更新
         self.check_updates_check = QCheckBox()
         self.check_updates_check.setChecked(True)
-        launcher_layout.addRow("检查更新:", self.check_updates_check)
+        self.launcher_layout.addRow("检查更新:", self.check_updates_check)
 
         # 游戏启动时关闭启动器
         self.close_launcher_check = QCheckBox()
         self.close_launcher_check.setChecked(True)
-        launcher_layout.addRow("游戏启动时关闭启动器:", self.close_launcher_check)
+        self.launcher_layout.addRow("游戏启动时关闭启动器:", self.close_launcher_check)
 
         layout.addWidget(self.launcher_group)
 
@@ -256,32 +262,32 @@ class SettingsPage(QWidget):
 
         # 创建下载设置
         self.download_group = QGroupBox("下载设置")
-        download_layout = QFormLayout(self.download_group)
-        download_layout.setSpacing(10)
+        self.download_layout = QFormLayout(self.download_group)
+        self.download_layout.setSpacing(10)
 
         # 下载源
         self.download_source_combo = QComboBox()
         self.download_source_combo.addItem("官方", "official")
         self.download_source_combo.addItem("BMCLAPI", "bmclapi")
         self.download_source_combo.addItem("MCBBS", "mcbbs")
-        download_layout.addRow("下载源:", self.download_source_combo)
+        self.download_layout.addRow("下载源:", self.download_source_combo)
 
         # 并发下载数
         self.concurrent_downloads_spin = QSpinBox()
         self.concurrent_downloads_spin.setMinimum(1)
         self.concurrent_downloads_spin.setMaximum(16)
         self.concurrent_downloads_spin.setValue(3)
-        download_layout.addRow("并发下载数:", self.concurrent_downloads_spin)
+        self.download_layout.addRow("并发下载数:", self.concurrent_downloads_spin)
 
         # 下载资源
         self.download_assets_check = QCheckBox()
         self.download_assets_check.setChecked(True)
-        download_layout.addRow("下载游戏资源:", self.download_assets_check)
+        self.download_layout.addRow("下载游戏资源:", self.download_assets_check)
 
         # 下载库文件
         self.download_libraries_check = QCheckBox()
         self.download_libraries_check.setChecked(True)
-        download_layout.addRow("下载库文件:", self.download_libraries_check)
+        self.download_layout.addRow("下载库文件:", self.download_libraries_check)
 
         layout.addWidget(self.download_group)
 
@@ -294,7 +300,7 @@ class SettingsPage(QWidget):
         """设置/刷新所有UI组件样式"""
 
         self.title_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 24px; font-weight: bold; background: transparent;"
         )
 
         self.tab_widget.setStyleSheet(
@@ -342,13 +348,13 @@ class SettingsPage(QWidget):
         )
 
         self.game_tab.setStyleSheet(
-            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+            f"background-color: {ThemeManager().get('home-window-background')}; color: {ThemeManager().get('text')}"
         )
 
         self.path_group.setStyleSheet(
             f"""
             QGroupBox {{
-                background-color: {ThemeManager().get("home-window-background")};
+                background-color: {ThemeManager().get('home-window-background')};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -418,7 +424,7 @@ class SettingsPage(QWidget):
         self.game_group.setStyleSheet(
             f"""
             QGroupBox {{
-                background-color: {ThemeManager().get("home-window-background")};
+                background-color: {ThemeManager().get('home-window-background')};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -501,13 +507,13 @@ class SettingsPage(QWidget):
         )
 
         self.launcher_tab.setStyleSheet(
-            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+            f"background-color: {ThemeManager().get('home-window-background')}; color: {ThemeManager().get('text')}"
         )
 
         self.launcher_group.setStyleSheet(
             f"""
             QGroupBox {{
-                background-color: {ThemeManager().get("home-window-background")};
+                background-color: {ThemeManager().get('home-window-background')};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -583,13 +589,13 @@ class SettingsPage(QWidget):
         )
 
         self.download_tab.setStyleSheet(
-            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+            f"background-color: {ThemeManager().get('home-window-background')}; color: {ThemeManager().get('text')}"
         )
 
         self.download_group.setStyleSheet(
             f"""
             QGroupBox {{
-                background-color: {ThemeManager().get("home-window-background")};
+                background-color: {ThemeManager().get('home-window-background')};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -664,6 +670,66 @@ class SettingsPage(QWidget):
         """
         )
 
+    def _set_text(self):
+        """设置/刷新所有UI组件的文字"""
+        self.title_label.setText(LocaleManager().get("settings"))
+        self.tab_widget.setTabText(0, LocaleManager().get("game"))
+        self.tab_widget.setTabText(1, LocaleManager().get("launcher"))
+        self.tab_widget.setTabText(2, LocaleManager().get("download"))
+        self.save_button.setText(LocaleManager().get("save"))
+
+        # game_tab
+        self.path_group.setTitle(LocaleManager().get("game_path"))
+        self.minecraft_dir_button.setText(LocaleManager().get("browse"))
+        self.path_layout.itemAt(0).widget().setText(
+            f"Minecraft {LocaleManager().get("folder")}:"
+        )
+        self.java_path_button.setText(LocaleManager().get("browse"))
+        self.path_layout.itemAt(2).widget().setText(
+            f"Java {LocaleManager().get("path")}:"
+        )
+        self.game_group.setTitle(LocaleManager().get("game_settings"))
+        self.game_layout.itemAt(0).widget().setText(LocaleManager().get("max_memory"))
+        self.game_layout.itemAt(2).widget().setText(
+            f"JVM {LocaleManager().get("parameter")}:"
+        )
+        self.fullscreen_check.setText(LocaleManager().get("fullscreen"))
+        self.game_layout.itemAt(4).widget().setText(LocaleManager().get("resolution"))
+        self.launcher_group.setTitle(LocaleManager().get("launcher_settings"))
+
+        # launcher_tab
+        self.launcher_layout.itemAt(0).widget().setText(LocaleManager().get("language"))
+        for i in range(self.theme_combo.count()):
+            self.theme_combo.setItemText(
+                i, LocaleManager().get(self.theme_combo.itemData(i))
+            )
+        self.launcher_layout.itemAt(2).widget().setText(LocaleManager().get("theme"))
+        self.launcher_layout.itemAt(4).widget().setText(
+            LocaleManager().get("check_for_updates")
+        )
+        self.launcher_layout.itemAt(6).widget().setText(
+            LocaleManager().get("close_launcher_when_game_starts")
+        )
+
+        # download_tab
+        self.download_group.setTitle(LocaleManager().get("download_settings"))
+        self.download_layout.itemAt(0).widget().setText(
+            LocaleManager().get("download_source")
+        )
+        for i in range(self.download_source_combo.count()):
+            self.download_source_combo.setItemText(
+                i, LocaleManager().get(self.download_source_combo.itemData(i))
+            )
+        self.download_layout.itemAt(2).widget().setText(
+            LocaleManager().get("parallel_download_count")
+        )
+        self.download_layout.itemAt(4).widget().setText(
+            LocaleManager().get("download_game_resources")
+        )
+        self.download_layout.itemAt(6).widget().setText(
+            LocaleManager().get("download_library_files")
+        )
+
     def _connect_signals(self):
         """连接信号槽"""
         # 设置控制器信号
@@ -680,6 +746,9 @@ class SettingsPage(QWidget):
 
         # UI刷新信号
         ThemeManager().updated.connect(self._set_style_sheet)
+
+        # 语言刷新信号
+        LocaleManager().updated.connect(self._set_text)
 
     @Slot(dict)
     def _handle_settings_loaded(self, settings: Dict[str, Any]):

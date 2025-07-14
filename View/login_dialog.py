@@ -16,6 +16,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Slot
 
 from Controller import AccountController
+
+from Utils.locale_manager import LocaleManager
 from .theme_manager import ThemeManager
 
 
@@ -45,6 +47,9 @@ class LoginDialog(QDialog):
 
         # 初始化UI
         self._init_ui()
+
+        # 设置UI文字语言
+        self._set_text()
 
         # 连接信号槽
         self._connect_signals()
@@ -124,7 +129,7 @@ class LoginDialog(QDialog):
         )
 
         self.title_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 20px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 20px; font-weight: bold; background: transparent;"
         )
 
         self.form_frame.setStyleSheet(
@@ -135,7 +140,7 @@ class LoginDialog(QDialog):
         )
 
         self.username_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
         self.username_edit.setStyleSheet(
@@ -154,7 +159,7 @@ class LoginDialog(QDialog):
         )
 
         self.password_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
         self.password_edit.setStyleSheet(
@@ -173,7 +178,7 @@ class LoginDialog(QDialog):
         )
 
         self.error_label.setStyleSheet(
-            f"color: {ThemeManager().get("negative-selection-background")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('negative-selection-background')}; font-size: 14px; background: transparent;"
         )
 
         self.cancel_button.setStyleSheet(
@@ -210,6 +215,17 @@ class LoginDialog(QDialog):
         """
         )
 
+    def _set_text(self):
+        """设置/刷新所有UI组件的文字"""
+        self.setWindowTitle(LocaleManager().get("user_login"))
+        self.title_label.setText(LocaleManager().get("account_login"))
+        self.username_label.setText(LocaleManager().get("username"))
+        self.username_edit.setPlaceholderText(LocaleManager().get("username_input"))
+        self.password_label.setText(LocaleManager().get("password"))
+        self.password_edit.setPlaceholderText(LocaleManager().get("password_input"))
+        self.cancel_button.setText(LocaleManager().get("cancel"))
+        self.login_button.setText(LocaleManager().get("login"))
+
     def _connect_signals(self):
         """连接信号槽"""
         # 按钮信号
@@ -223,6 +239,9 @@ class LoginDialog(QDialog):
         # 输入框信号
         self.username_edit.textChanged.connect(self._validate_inputs)
         self.password_edit.textChanged.connect(self._validate_inputs)
+
+        # 语言刷新信号
+        LocaleManager().updated.connect(self._set_text)
 
     def _validate_inputs(self):
         """验证输入"""
@@ -240,7 +259,7 @@ class LoginDialog(QDialog):
 
         # 禁用登录按钮
         self.login_button.setEnabled(False)
-        self.login_button.setText("正在登录...")
+        self.login_button.setText(LocaleManager().get("logging_in"))
 
         # 隐藏错误信息
         self.error_label.setVisible(False)
@@ -272,4 +291,4 @@ class LoginDialog(QDialog):
 
         # 恢复登录按钮
         self.login_button.setEnabled(True)
-        self.login_button.setText("登录")
+        self.login_button.setText(LocaleManager().get("login"))
