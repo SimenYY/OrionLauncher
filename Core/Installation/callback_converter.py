@@ -21,60 +21,67 @@ logger = logging.getLogger(__name__)
 
 
 class InstallationTaskType(Enum):
+    """安装任务类型枚举。
+
+    定义了支持的各种安装任务类型，用于回调转换器识别不同的任务。
     """
-    安装任务类型枚举
-    """
-    DOWNLOAD = "download"
-    INSTALL_GAME = "install_game"
-    INSTALL_FORGE = "install_forge"
-    INSTALL_NEOFORGE = "install_neoforge"
-    INSTALL_FABRIC = "install_fabric"
-    INSTALL_QUILT = "install_quilt"
-    INSTALL_LITELOADER = "install_liteloader"
-    VERIFY = "verify"
+    DOWNLOAD = "download"                       # 下载任务
+    INSTALL_GAME = "install_game"               # 游戏安装任务
+    INSTALL_FORGE = "install_forge"             # Forge 安装任务
+    INSTALL_NEOFORGE = "install_neoforge"       # NeoForge 安装任务
+    INSTALL_FABRIC = "install_fabric"           # Fabric 安装任务
+    INSTALL_QUILT = "install_quilt"             # Quilt 安装任务
+    INSTALL_LITELOADER = "install_liteloader"   # LiteLoader 安装任务
+    VERIFY = "verify"                           # 验证任务
 
 
 class CallbackConverter:
-    """
-    回调转换器
-    
-    将 InstallationCallbackGroup 的回调接口转换为 minecraft_launcher_lib 
+    """回调转换器。
+
+    将 InstallationCallbackGroup 的回调接口转换为 minecraft_launcher_lib
     所需的 CallbackDict 格式，实现不同回调系统之间的适配。
+
+    该转换器负责将底层库的回调事件转换为上层应用可以理解的回调格式，
+    支持多种安装任务类型的回调处理。
+
+    Attributes:
+        callback_group (InstallationCallbackGroup): 回调组实例。
+        logger (logging.Logger): 日志记录器实例。
     """
-    
-    def __init__(self, callback_group: InstallationCallbackGroup):
-        """
-        初始化回调转换器
-        
+
+    def __init__(self, callback_group: InstallationCallbackGroup) -> None:
+        """初始化回调转换器。
+
         Args:
-            callback_group: InstallationCallbackGroup 实例
+            callback_group: InstallationCallbackGroup 实例，用于处理转换后的回调。
         """
         self.callback_group = callback_group
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        
+
         # 当前任务状态
         self._current_task_type: Optional[InstallationTaskType] = None
         self._current_max_progress: int = 100
         self._current_progress: int = 0
         
     def get_callback_dict(self, task_type: InstallationTaskType) -> CallbackDict:
-        """
-        获取指定任务类型的 CallbackDict
-        
+        """获取指定任务类型的 CallbackDict。
+
+        根据任务类型创建相应的回调字典，用于与 minecraft_launcher_lib 交互。
+
         Args:
-            task_type: 安装任务类型
-            
+            task_type: 安装任务类型。
+
         Returns:
-            转换后的 CallbackDict
+            CallbackDict: 转换后的回调字典，包含 setStatus、setProgress 和 setMax 回调。
         """
         self._current_task_type = task_type
-        
+
         callback_dict: CallbackDict = {
             "setStatus": self._on_set_status,
             "setProgress": self._on_set_progress,
             "setMax": self._on_set_max,
         }
-        
+
         return callback_dict
     
     def _on_set_status(self, status: str) -> None:
@@ -247,33 +254,36 @@ class CallbackConverter:
 
 
 class MultiTaskCallbackConverter(CallbackConverter):
-    """
-    多任务回调转换器
-    
+    """多任务回调转换器。
+
     支持多个任务的回调转换，可以跟踪多个任务的状态并提供统一的回调接口。
+    该转换器能够计算多个任务的总体进度，并在所有任务完成时触发完成回调。
+
+    Attributes:
+        _task_states (Dict[InstallationTaskType, Dict[str, Any]]): 任务状态跟踪字典。
+        _total_tasks (int): 总任务数。
+        _completed_tasks (int): 已完成任务数。
     """
-    
-    def __init__(self, callback_group: InstallationCallbackGroup):
-        """
-        初始化多任务回调转换器
-        
+
+    def __init__(self, callback_group: InstallationCallbackGroup) -> None:
+        """初始化多任务回调转换器。
+
         Args:
-            callback_group: InstallationCallbackGroup 实例
+            callback_group: InstallationCallbackGroup 实例，用于处理转换后的回调。
         """
         super().__init__(callback_group)
-        
+
         # 任务状态跟踪
         self._task_states: Dict[InstallationTaskType, Dict[str, Any]] = {}
         self._total_tasks = 0
         self._completed_tasks = 0
     
     def add_task(self, task_type: InstallationTaskType, weight: float = 1.0) -> None:
-        """
-        添加任务
-        
+        """添加任务到多任务转换器。
+
         Args:
-            task_type: 任务类型
-            weight: 任务权重（用于计算总体进度）
+            task_type: 要添加的任务类型。
+            weight: 任务权重，用于计算总体进度，默认为 1.0。
         """
         self._task_states[task_type] = {
             "weight": weight,
@@ -334,12 +344,12 @@ class MultiTaskCallbackConverter(CallbackConverter):
             total_weighted_progress = 0
             total_weight = 0
             
-            for task_type, state in self._task_states.items():
+            for _, state in self._task_states.items():
                 if state["max_progress"] > 0:
                     task_progress = (state["progress"] / state["max_progress"]) * 100
                 else:
                     task_progress = 0
-                    
+
                 total_weighted_progress += task_progress * state["weight"]
                 total_weight += state["weight"]
             

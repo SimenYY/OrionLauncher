@@ -46,120 +46,130 @@ class TaskPriority(Enum):
 
 
 class InstallationTask(ABC):
-    """
-    安装任务抽象基类
-    
+    """安装任务抽象基类。
+
     定义了安装任务的通用接口和生命周期管理。
-    所有具体的安装任务都应该继承此类。
+    所有具体的安装任务都应该继承此类并实现抽象方法。
+
+    Attributes:
+        task_id (str): 任务唯一标识符。
+        name (str): 任务名称。
+        description (str): 任务描述。
+        priority (TaskPriority): 任务优先级。
+        dependencies (List[str]): 依赖的任务 ID 列表。
+        status (TaskStatus): 当前任务状态。
+        progress (int): 任务进度百分比 (0-100)。
+        error_message (Optional[str]): 错误消息，仅在任务失败时设置。
+        result (Optional[Any]): 任务执行结果。
+        logger (logging.Logger): 日志记录器实例。
     """
-    
-    def __init__(self, 
+
+    def __init__(self,
                  task_id: str,
                  name: str,
                  description: str = "",
                  priority: TaskPriority = TaskPriority.NORMAL,
-                 dependencies: Optional[List[str]] = None):
-        """
-        初始化安装任务
-        
+                 dependencies: Optional[List[str]] = None) -> None:
+        """初始化安装任务。
+
         Args:
-            task_id: 任务唯一标识符
-            name: 任务名称
-            description: 任务描述
-            priority: 任务优先级
-            dependencies: 依赖的任务 ID 列表
+            task_id: 任务唯一标识符。
+            name: 任务名称。
+            description: 任务描述。
+            priority: 任务优先级，默认为 NORMAL。
+            dependencies: 依赖的任务 ID 列表，默认为空列表。
         """
         self.task_id = task_id
         self.name = name
         self.description = description
         self.priority = priority
         self.dependencies = dependencies or []
-        
+
         # 任务状态
         self.status = TaskStatus.PENDING
         self.progress = 0
         self.error_message: Optional[str] = None
         self.result: Optional[Any] = None
-        
+
         # 日志记录器
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        
+
         # 回调相关
         self._callback_converter: Optional[CallbackConverter] = None
     
     @abstractmethod
     def execute(self, callback_converter: CallbackConverter, **kwargs) -> bool:
-        """
-        执行任务
-        
+        """执行任务。
+
+        子类必须实现此方法来定义具体的任务执行逻辑。
+
         Args:
-            callback_converter: 回调转换器
-            **kwargs: 任务执行参数
-            
+            callback_converter: 回调转换器，用于处理进度和状态回调。
+            **kwargs: 任务执行参数。
+
         Returns:
-            执行是否成功
+            bool: 执行成功返回 True，失败返回 False。
         """
         pass
-    
+
     @abstractmethod
     def validate(self, **kwargs) -> bool:
-        """
-        验证任务执行条件
-        
+        """验证任务执行条件。
+
+        子类必须实现此方法来验证任务是否可以执行。
+
         Args:
-            **kwargs: 验证参数
-            
+            **kwargs: 验证参数。
+
         Returns:
-            验证是否通过
+            bool: 验证通过返回 True，否则返回 False。
         """
         pass
-    
+
     @abstractmethod
     def get_estimated_duration(self) -> int:
-        """
-        获取任务预估执行时间（秒）
-        
+        """获取任务预估执行时间。
+
+        子类必须实现此方法来提供任务的预估执行时间。
+
         Returns:
-            预估执行时间
+            int: 预估执行时间（秒）。
         """
         pass
-    
+
     def can_execute(self, completed_tasks: List[str]) -> bool:
-        """
-        检查任务是否可以执行（依赖是否满足）
-        
+        """检查任务是否可以执行（依赖是否满足）。
+
         Args:
-            completed_tasks: 已完成的任务 ID 列表
-            
+            completed_tasks: 已完成的任务 ID 列表。
+
         Returns:
-            是否可以执行
+            bool: 如果所有依赖都已完成返回 True，否则返回 False。
         """
         for dependency in self.dependencies:
             if dependency not in completed_tasks:
                 return False
         return True
-    
+
     def set_status(self, status: TaskStatus, error_message: Optional[str] = None) -> None:
-        """
-        设置任务状态
-        
+        """设置任务状态。
+
         Args:
-            status: 新状态
-            error_message: 错误消息（仅在失败时设置）
+            status: 新的任务状态。
+            error_message: 错误消息，仅在状态为失败时设置。
         """
         self.status = status
         self.error_message = error_message
         self.logger.debug(f"任务 {self.task_id} 状态更新: {status.value}")
-        
+
         if error_message:
             self.logger.error(f"任务 {self.task_id} 失败: {error_message}")
-    
+
     def set_progress(self, progress: int) -> None:
-        """
-        设置任务进度
-        
+        """设置任务进度。
+
         Args:
-            progress: 进度百分比 (0-100)
+            progress: 进度百分比，范围为 0-100。
         """
         self.progress = max(0, min(100, progress))
         self.logger.debug(f"任务 {self.task_id} 进度: {self.progress}%")
@@ -172,12 +182,17 @@ class InstallationTask(ABC):
 
 
 class GameInstallationTask(InstallationTask):
+    """游戏安装任务。
+
+    负责安装指定版本的 Minecraft 游戏，包括下载游戏文件、
+    资源文件和依赖库等。
+
+    Attributes:
+        version_id (str): 要安装的游戏版本 ID。
+        minecraft_directory (str): Minecraft 安装目录路径。
+        adapter (InstallationAdapter): 用于执行安装的适配器实例。
     """
-    游戏安装任务
-    
-    负责安装指定版本的 Minecraft 游戏。
-    """
-    
+
     def __init__(self,
                  task_id: str,
                  version_id: str,
@@ -185,26 +200,25 @@ class GameInstallationTask(InstallationTask):
                  adapter: InstallationAdapter,
                  name: Optional[str] = None,
                  description: Optional[str] = None,
-                 priority: TaskPriority = TaskPriority.HIGH):
-        """
-        初始化游戏安装任务
-        
+                 priority: TaskPriority = TaskPriority.HIGH) -> None:
+        """初始化游戏安装任务。
+
         Args:
-            task_id: 任务唯一标识符
-            version_id: 游戏版本 ID
-            minecraft_directory: Minecraft 安装目录
-            adapter: 安装适配器
-            name: 任务名称（可选）
-            description: 任务描述（可选）
-            priority: 任务优先级
+            task_id: 任务唯一标识符。
+            version_id: 要安装的游戏版本 ID。
+            minecraft_directory: Minecraft 安装目录路径。
+            adapter: 用于执行安装的适配器实例。
+            name: 任务名称，如果为 None 则自动生成。
+            description: 任务描述，如果为 None 则自动生成。
+            priority: 任务优先级，默认为 HIGH。
         """
         if name is None:
             name = f"安装 Minecraft {version_id}"
         if description is None:
             description = f"安装 Minecraft 版本 {version_id} 到 {minecraft_directory}"
-            
+
         super().__init__(task_id, name, description, priority)
-        
+
         self.version_id = version_id
         self.minecraft_directory = str(minecraft_directory)
         self.adapter = adapter

@@ -42,4 +42,42 @@ Minecraft版本管理
 .. automodule:: Core.user
    :members:
    :undoc-members:
-   :show-inheritance: 
+   :show-inheritance:
+
+安装模块
+--------
+
+Core.Installation 模块提供了一个兼容 InstallationCallbackGroup 的 Model 层安装调度工具，
+实现了与 minecraft_launcher_lib 的解耦，支持多种安装任务的调度和管理。
+
+安装调度器
+~~~~~~~~~~
+
+.. automodule:: Core.Installation.scheduler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+安装适配器
+~~~~~~~~~~
+
+.. automodule:: Core.Installation.adapter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+安装任务
+~~~~~~~~
+
+.. automodule:: Core.Installation.tasks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+回调转换器
+~~~~~~~~~~
+
+.. automodule:: Core.Installation.callback_converter
+   :members:
+   :undoc-members:
+   :show-inheritance:
