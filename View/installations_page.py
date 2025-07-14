@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 
 from Controller import GameController
 
+from Utils.locale_manager import LocaleManager
 from .theme_manager import ThemeManager
 
 
@@ -48,6 +49,9 @@ class InstallationsPage(QWidget):
 
         # 初始化UI
         self._init_ui()
+
+        # 设置UI文字语言
+        self._set_text()
 
         # 连接信号槽
         self._connect_signals()
@@ -288,6 +292,16 @@ class InstallationsPage(QWidget):
         """
         )
 
+    def _set_text(self):
+        """设置/刷新所有UI组件的文字"""
+        self.title_label.setText(LocaleManager().get("installation"))
+        self.installed_title.setText(LocaleManager().get("installed_version"))
+        self.delete_button.setText(LocaleManager().get("delete"))
+        self.launch_button.setText(LocaleManager().get("launch"))
+        self.install_title.setText(LocaleManager().get("install_new_version"))
+        self.version_label.setText(LocaleManager().get("select_version"))
+        self.install_button.setText(LocaleManager().get("install"))
+
     def _connect_signals(self):
         """连接信号槽"""
         # 游戏控制器信号
@@ -307,6 +321,9 @@ class InstallationsPage(QWidget):
 
         # UI刷新信号
         ThemeManager().updated.connect(self._set_style_sheet)
+
+        # 语言刷新信号
+        LocaleManager().updated.connect(self._set_text)
 
     @Slot(list)
     def _handle_version_list_updated(self, versions: List[Dict[str, Any]]):
@@ -342,7 +359,7 @@ class InstallationsPage(QWidget):
 
         # 禁用安装按钮
         self.install_button.setEnabled(False)
-        self.install_button.setText("正在安装...")
+        self.install_button.setText(LocaleManager().get("installing"))
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
 
@@ -395,7 +412,7 @@ class InstallationsPage(QWidget):
         if task_name == "install_game":
             # 恢复安装按钮
             self.install_button.setEnabled(True)
-            self.install_button.setText("安装")
+            self.install_button.setText(LocaleManager().get("install"))
             self.progress_bar.setVisible(False)
 
             # 添加到已安装列表

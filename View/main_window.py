@@ -25,6 +25,7 @@ from .home_page import HomePage
 from .installations_page import InstallationsPage
 from .settings_page import SettingsPage
 from .login_dialog import LoginDialog
+from Utils.locale_manager import LocaleManager
 from .theme_manager import ThemeManager
 
 
@@ -159,6 +160,9 @@ class MainWindow(QMainWindow):
 
         # 添加UI样式
         self._set_style_sheet()
+
+        # 添加UI文字
+        self._set_text()
 
     def _create_sidebar(self) -> QWidget:
         """
@@ -300,6 +304,14 @@ class MainWindow(QMainWindow):
             f"background-color: rgba(255, 255, 255, {int(255 * ThemeManager().get_background_opacity())})"
         )
 
+    def _set_text(self):
+        """设置/刷新所有UI组件的文字"""
+        self.home_btn.setText(LocaleManager().get("home"))
+        self.installations_btn.setText(LocaleManager().get("installation"))
+        self.settings_btn.setText(LocaleManager().get("settings"))
+        self.user_info.setText(LocaleManager().get("not_logged_in"))
+        self.login_btn.setText(LocaleManager().get("login"))
+
     def _init_controllers(self):
         """初始化控制器"""
         self.game_controller.initialize()
@@ -322,6 +334,9 @@ class MainWindow(QMainWindow):
 
         # UI刷新信号
         ThemeManager().updated.connect(self._set_style_sheet)
+
+        # 语言刷新信号
+        LocaleManager().updated.connect(self._set_text)
 
     def resizeEvent(self, event):
         """
@@ -379,14 +394,16 @@ class MainWindow(QMainWindow):
         Args:
             account_info: 账户信息
         """
-        self.user_info.setText(f"{account_info['username']} (已登录)")
-        self.login_btn.setText("登出")
+        self.user_info.setText(
+            f"{account_info['username']} ({LocaleManager().get("logged_in")})"
+        )
+        self.login_btn.setText(LocaleManager().get("log_out"))
 
     @Slot()
     def _handle_logout_completed(self):
         """处理登出完成事件"""
-        self.user_info.setText("未登录")
-        self.login_btn.setText("登录")
+        self.user_info.setText(LocaleManager().get("not_logged_in"))
+        self.login_btn.setText(LocaleManager().get("login"))
 
     def closeEvent(self, event: QCloseEvent):
         """
