@@ -31,21 +31,30 @@ logger = logging.getLogger(__name__)
 
 
 class SchedulerStatus(Enum):
+    """调度器状态枚举。
+
+    定义了调度器可能的运行状态。
     """
-    调度器状态枚举
-    """
-    IDLE = "idle"               # 空闲
-    RUNNING = "running"         # 运行中
-    PAUSED = "paused"           # 暂停
-    STOPPING = "stopping"      # 停止中
-    STOPPED = "stopped"         # 已停止
-    ERROR = "error"             # 错误
+    IDLE = "idle"               # 空闲状态，没有任务在执行
+    RUNNING = "running"         # 运行中，正在执行任务
+    PAUSED = "paused"           # 暂停状态，暂时停止调度新任务
+    STOPPING = "stopping"      # 停止中，正在停止调度器
+    STOPPED = "stopped"         # 已停止，调度器完全停止
+    ERROR = "error"             # 错误状态，调度器遇到错误
 
 
 @dataclass
 class TaskExecutionResult:
-    """
-    任务执行结果
+    """任务执行结果数据类。
+
+    包含任务执行的详细结果信息。
+
+    Attributes:
+        task_id (str): 任务 ID。
+        success (bool): 执行是否成功。
+        error_message (Optional[str]): 错误消息，仅在失败时设置。
+        result (Optional[Any]): 任务执行结果。
+        execution_time (float): 执行耗时（秒）。
     """
     task_id: str
     success: bool
@@ -56,8 +65,17 @@ class TaskExecutionResult:
 
 @dataclass
 class SchedulerConfig:
-    """
-    调度器配置
+    """调度器配置数据类。
+
+    包含调度器的各种配置参数。
+
+    Attributes:
+        max_concurrent_tasks (int): 最大并发任务数，默认为 3。
+        max_retries (int): 任务失败时的最大重试次数，默认为 3。
+        retry_delay (float): 重试延迟时间（秒），默认为 5.0。
+        task_timeout (float): 任务超时时间（秒），默认为 3600.0（1小时）。
+        enable_dependency_check (bool): 是否启用依赖检查，默认为 True。
+        enable_task_validation (bool): 是否启用任务验证，默认为 True。
     """
     max_concurrent_tasks: int = 3
     max_retries: int = 3
@@ -68,30 +86,37 @@ class SchedulerConfig:
 
 
 class InstallationScheduler:
-    """
-    安装调度器
-    
+    """安装调度器。
+
     负责管理和调度安装任务，兼容 InstallationCallbackGroup 接口。
     支持任务队列、依赖解析、并发执行和状态管理。
+
+    调度器采用生产者-消费者模式，使用优先级队列管理任务，
+    支持任务依赖检查、失败重试和并发控制。
+
+    Attributes:
+        callback_group (InstallationCallbackGroup): 回调组实例。
+        config (SchedulerConfig): 调度器配置。
+        status (SchedulerStatus): 当前调度器状态。
+        logger (logging.Logger): 日志记录器实例。
     """
-    
+
     def __init__(self,
                  callback_group: InstallationCallbackGroup,
-                 config: Optional[SchedulerConfig] = None):
-        """
-        初始化安装调度器
-        
+                 config: Optional[SchedulerConfig] = None) -> None:
+        """初始化安装调度器。
+
         Args:
-            callback_group: 回调组实例
-            config: 调度器配置
+            callback_group: 回调组实例，用于处理安装过程中的回调。
+            config: 调度器配置，如果为 None 则使用默认配置。
         """
         self.callback_group = callback_group
         self.config = config or SchedulerConfig()
-        
+
         # 调度器状态
         self.status = SchedulerStatus.IDLE
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        
+
         # 任务管理
         self._tasks: Dict[str, InstallationTask] = {}
         self._task_queue: PriorityQueue = PriorityQueue()
@@ -99,21 +124,21 @@ class InstallationScheduler:
         self._completed_tasks: Set[str] = set()
         self._failed_tasks: Set[str] = set()
         self._retry_counts: Dict[str, int] = {}
-        
+
         # 线程池
         self._executor: Optional[ThreadPoolExecutor] = None
         self._scheduler_thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
-        
+
         # 回调转换器
         self._callback_converter: Optional[CallbackConverter] = None
-        
+
         # 统计信息
         self._total_tasks = 0
         self._completed_count = 0
         self._failed_count = 0
         self._start_time: Optional[float] = None
-        
+
         # 锁
         self._lock = threading.RLock()
     
