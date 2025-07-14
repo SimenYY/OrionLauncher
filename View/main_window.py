@@ -250,11 +250,11 @@ class MainWindow(QMainWindow):
         )
 
         self.logo_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 24px; font-weight: bold; background: transparent;"
         )
 
         self.user_info.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
         self.login_btn.setStyleSheet(

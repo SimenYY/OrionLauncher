@@ -137,7 +137,7 @@ class HomePage(QWidget):
         )
 
         self.title_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 18px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 18px; font-weight: bold; background: transparent;"
         )
 
         self.bottom_frame.setStyleSheet(
@@ -150,7 +150,7 @@ class HomePage(QWidget):
         )
 
         self.version_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
         self.version_combo.setStyleSheet(
@@ -177,7 +177,7 @@ class HomePage(QWidget):
         )
 
         self.version_info.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
         self.play_button.setStyleSheet(
@@ -216,7 +216,7 @@ class HomePage(QWidget):
         )
 
         self.tip_label.setStyleSheet(
-            f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
+            f"color: {ThemeManager().get('label')}; font-size: 14px; background: transparent;"
         )
 
     def _connect_signals(self):

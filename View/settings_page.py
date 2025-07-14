@@ -294,7 +294,7 @@ class SettingsPage(QWidget):
         """设置/刷新所有UI组件样式"""
 
         self.title_label.setStyleSheet(
-            f"color: {ThemeManager().get("title")}; font-size: 24px; font-weight: bold; background: transparent;"
+            f"color: {ThemeManager().get('title')}; font-size: 24px; font-weight: bold; background: transparent;"
         )
 
         self.tab_widget.setStyleSheet(
@@ -342,13 +342,13 @@ class SettingsPage(QWidget):
         )
 
         self.game_tab.setStyleSheet(
-            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+            f"background-color: {ThemeManager().get('home-window-background')}; color: {ThemeManager().get('text')}"
         )
 
         self.path_group.setStyleSheet(
             f"""
             QGroupBox {{
-                background-color: {ThemeManager().get("home-window-background")};
+                background-color: {ThemeManager().get('home-window-background')};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -418,7 +418,7 @@ class SettingsPage(QWidget):
         self.game_group.setStyleSheet(
             f"""
             QGroupBox {{
-                background-color: {ThemeManager().get("home-window-background")};
+                background-color: {ThemeManager().get('home-window-background')};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -501,13 +501,13 @@ class SettingsPage(QWidget):
         )
 
         self.launcher_tab.setStyleSheet(
-            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+            f"background-color: {ThemeManager().get('home-window-background')}; color: {ThemeManager().get('text')}"
         )
 
         self.launcher_group.setStyleSheet(
             f"""
             QGroupBox {{
-                background-color: {ThemeManager().get("home-window-background")};
+                background-color: {ThemeManager().get('home-window-background')};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
@@ -583,13 +583,13 @@ class SettingsPage(QWidget):
         )
 
         self.download_tab.setStyleSheet(
-            f"background-color: {ThemeManager().get("home-window-background")}; color: {ThemeManager().get("text")}"
+            f"background-color: {ThemeManager().get('home-window-background')}; color: {ThemeManager().get('text')}"
         )
 
         self.download_group.setStyleSheet(
             f"""
             QGroupBox {{
-                background-color: {ThemeManager().get("home-window-background")};
+                background-color: {ThemeManager().get('home-window-background')};
                 border: 1px solid {ThemeManager().get("border")};
                 border-radius: 4px;
                 margin-top: 1em;
