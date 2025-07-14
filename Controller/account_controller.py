@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Any
 from PySide6.QtCore import Signal
 
 from .base_controller import BaseController
+from Utils.locale_manager import LocaleManager
 
 
 class AccountController(BaseController):
@@ -79,7 +80,7 @@ class AccountController(BaseController):
             self.login_success.emit(account_info)
             return account_info
         else:
-            error_msg = "用户名或密码不能为空"
+            error_msg = LocaleManager().get("username_password_empty_error")
             self.login_failed.emit(error_msg)
             return {"error": error_msg}
 

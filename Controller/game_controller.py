@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Any
 from PySide6.QtCore import Signal, QObject
 
 from .base_controller import BaseController
+from Utils.locale_manager import LocaleManager
 
 
 class GameController(BaseController):
@@ -154,7 +155,8 @@ class GameController(BaseController):
                 controller.launch_game("1.21", "Steve")
         """
         if not version_id or not username:
-            self.error_occurred.emit("版本ID和用户名不能为空")
+            error_msg = LocaleManager().get("version_id_username_empty_error")
+            self.error_occurred.emit(error_msg)
             return
 
         self.game_launch_started.emit()

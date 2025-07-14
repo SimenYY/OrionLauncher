@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 
 from Controller import AccountController, GameController
 
+from Utils.locale_manager import LocaleManager
 from .theme_manager import ThemeManager
 
 
@@ -125,6 +126,9 @@ class HomePage(QWidget):
         # 添加UI样式
         self._set_style_sheet()
 
+        # 设置UI文字语言
+        self._set_text()
+
     def _set_style_sheet(self):
         """设置/刷新所有UI组件样式"""
         self.top_frame.setStyleSheet(
@@ -219,6 +223,10 @@ class HomePage(QWidget):
             f"color: {ThemeManager().get("label")}; font-size: 14px; background: transparent;"
         )
 
+    def _set_text(self):
+        """设置/刷新所有UI组件的文字"""
+        self.version_label.setText(LocaleManager().get("game_version"))
+
     def _connect_signals(self):
         """连接信号槽"""
         # 游戏控制器信号
@@ -239,6 +247,9 @@ class HomePage(QWidget):
 
         # UI刷新信号
         ThemeManager().updated.connect(self._set_style_sheet)
+
+        # 语言刷新信号
+        LocaleManager().updated.connect(self._set_text)
 
     @Slot(list)
     def _handle_version_list_updated(self, versions: List[Dict[str, Any]]):
@@ -290,7 +301,7 @@ class HomePage(QWidget):
     def _handle_game_launch_started(self):
         """处理游戏启动开始事件"""
         self.play_button.setEnabled(False)
-        self.play_button.setText("正在启动...")
+        self.play_button.setText(LocaleManager().get("starting"))
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
 
@@ -298,7 +309,7 @@ class HomePage(QWidget):
     def _handle_game_launched(self):
         """处理游戏启动完成事件"""
         self.play_button.setEnabled(True)
-        self.play_button.setText("PLAY")
+        self.play_button.setText(LocaleManager().get("play_button"))
         self.progress_bar.setVisible(False)
 
     @Slot(str, int)

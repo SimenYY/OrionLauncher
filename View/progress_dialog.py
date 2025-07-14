@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Slot
 
+from Utils.locale_manager import LocaleManager
 from .theme_manager import ThemeManager
 
 
@@ -41,6 +42,9 @@ class ProgressDialog(QDialog):
 
         # 初始化UI
         self._init_ui()
+
+        # 设置UI文字语言
+        self._set_text()
 
     def _init_ui(self):
         """初始化UI"""
@@ -123,6 +127,11 @@ class ProgressDialog(QDialog):
             }}
         """
         )
+
+    def _set_text(self):
+        """设置/刷新所有UI组件的文字"""
+        self.task_label.setText(LocaleManager().get("processing"))
+        self.cancel_button.setText(LocaleManager().get("cancel"))
 
     def set_task(self, task_name: str):
         """
