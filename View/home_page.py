@@ -188,7 +188,7 @@ class HomePage(QWidget):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("theme_text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 15px;
                 font-size: 18px;

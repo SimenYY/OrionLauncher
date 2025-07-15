@@ -30,7 +30,7 @@ class ColorPalette:
             "focus-border": self.theme_color,
             "progress-bar": self.theme_color,
             "title": self.theme_color,
-            "theme_text": theme_text,
+            "theme-text": theme_text,
         }
         if base_theme == "dark":
             self.colors.update(
@@ -99,6 +99,9 @@ class ColorPalette:
     def get_base_theme(self):
         return self.base_theme
 
+    def get_colors(self):
+        return self.colors
+
 
 class GreenThemePalette(ColorPalette):
     """
@@ -165,15 +168,27 @@ class ThemeManager(QObject):
             raise TypeError("Expected a ColorPalette instance.")
         self.current_color_palette = palette
 
-    def setTheme(self, theme):
+    def set_theme(self, theme):
         match theme:
             case "light":
                 self.set_palette(DarkGreenThemePalette())
             case "dark":
                 self.set_palette(GreenThemePalette())
+            case "custom":
+                pass
             case _:
                 self.set_palette(BlueThemePalette())
         self.updated.emit()
+
+    def set_custom_theme(self, theme_color, theme_color_alt, theme_text, base_theme):
+        background_opacity = 0.5 if base_theme == "light" else 0
+        self.current_color_palette = ColorPalette(
+            theme_color=theme_color,
+            theme_color_alt=theme_color_alt,
+            theme_text=theme_text,
+            background_opacity=background_opacity,
+            base_theme=base_theme,
+        )
 
     def get_palette(self):
         return self.current_color_palette
@@ -190,3 +205,6 @@ class ThemeManager(QObject):
 
     def get_base_theme(self):
         return self.current_color_palette.get_base_theme()
+
+    def get_colors(self):
+        return self.current_color_palette.get_colors()

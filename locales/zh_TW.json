@@ -52,5 +52,11 @@
   "user_login": "使用者登入",
   "processing": "正在處理...",
   "username_password_empty_error": "使用者名稱或密碼不能為空",
-  "version_id_username_empty_error": "版本ID和使用者名稱不能為空"
+  "version_id_username_empty_error": "版本ID和使用者名稱不能為空",
+  "custom": "自訂",
+  "color_picker": "自訂主題色",
+  "primary_color": "主題色",
+  "secondary_color": "次主題色",
+  "text_color": "文字主題色",
+  "base_theme": "基礎主題"
 }

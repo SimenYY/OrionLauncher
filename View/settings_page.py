@@ -26,6 +26,8 @@ from PySide6.QtCore import Slot
 from Controller import SettingsController
 
 from Utils.locale_manager import LocaleManager
+
+from .color_picker import ColorPicker
 from .theme_manager import ThemeManager
 
 
@@ -104,7 +106,7 @@ class SettingsPage(QWidget):
 
     def _on_save_button_click(self):
         # 处理主题切换
-        ThemeManager().setTheme(self.theme_combo.currentData())
+        ThemeManager().set_theme(self.theme_combo.currentData())
         LocaleManager().set_locale(self.language_combo.currentData())
 
     def _create_game_tab(self) -> QWidget:
@@ -218,19 +220,11 @@ class SettingsPage(QWidget):
 
         # 主题
         self.theme_combo = QComboBox()
-
-        # 当前主题色放置于最顶端
-        match ThemeManager().get_base_theme():
-            case "dark":
-                self.theme_combo.addItem("深色", "dark")
-                self.theme_combo.addItem("浅色", "light")
-            case "light":
-                self.theme_combo.addItem("浅色", "light")
-                self.theme_combo.addItem("深色", "dark")
-            case _:
-                self.theme_combo.addItem("深色", "dark")
-                self.theme_combo.addItem("浅色", "light")
+        self.theme_combo.addItem("深色", "dark")
+        self.theme_combo.addItem("浅色", "light")
+        self.theme_combo.addItem("自定义", "custom")
         self.launcher_layout.addRow("主题:", self.theme_combo)
+        self.theme_combo.activated.connect(self._start_custom_color_picker)
 
         # 检查更新
         self.check_updates_check = QCheckBox()
@@ -731,6 +725,24 @@ class SettingsPage(QWidget):
             LocaleManager().get("download_library_files")
         )
 
+    def _start_custom_color_picker(self, index):
+        if self.theme_combo.itemData(index) != "custom":
+            return
+        self.color_picker = ColorPicker()
+        self.color_picker.setFixedSize(750, 400)
+        self.color_picker.show()
+        self.color_picker.saved.connect(self._close_custom_color_picker)
+
+    def _close_custom_color_picker(self):
+        theme_color, theme_color_alt, theme_text = self.color_picker.colors
+        ThemeManager().set_custom_theme(
+            theme_color,
+            theme_color_alt,
+            theme_text,
+            self.color_picker.theme_combo.currentData(),
+        )
+        self.color_picker.close()
+
     def _connect_signals(self):
         """连接信号槽"""
         # 设置控制器信号
@@ -837,6 +849,9 @@ class SettingsPage(QWidget):
         )
         self.settings_controller.set_setting(
             "launcher", "theme", self.theme_combo.currentData()
+        )
+        self.settings_controller.set_setting(
+            "launcher", "theme_colors", ThemeManager().get_colors()
         )
         self.settings_controller.set_setting(
             "launcher", "check_updates", self.check_updates_check.isChecked()
