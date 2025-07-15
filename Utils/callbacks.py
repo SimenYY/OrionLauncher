@@ -130,8 +130,8 @@ class IAccountLogin(Protocol):
         """登录开始信号"""
     def authenticating(self):
         """正在进行身份验证"""
-    def waiting_user_input(self, message: str):
-        """等待用户输入（如验证码、授权等）"""
+    def device_code(self, code: str):
+        """设备代码，等待用户输入"""
     def progress(self, step: str, current: int, total: int):
         """登录进度，step为当前步骤描述"""
     def success(self, username: str, uuid: str, access_token: str):
@@ -140,6 +140,18 @@ class IAccountLogin(Protocol):
         """登录流程完成信号"""
     def error(self, error: Exception):
         """登录错误信号，传递错误"""
+
+
+class IOfflineAccountAdd(Protocol):
+    """
+    离线账号添加信号
+    """
+    def start(self):
+        """添加开始信号"""
+    def finished(self):
+        """添加完成信号"""
+    def error(self, error: Exception):
+        """添加错误信号，传递错误"""
 
 
 class IAccountRefresh(Protocol):

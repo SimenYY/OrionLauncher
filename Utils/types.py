@@ -20,4 +20,3 @@ class ProcessLog(TypedDict):
     level: str
     message: str
     timestamp: int
-    
