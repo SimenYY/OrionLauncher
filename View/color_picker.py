@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QWidget,
+    QDialog,
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
@@ -11,23 +11,24 @@ from PySide6.QtWidgets import (
     QComboBox,
 )
 from PySide6.QtGui import QColor
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt
 
 from Utils.locale_manager import LocaleManager
 
 from .theme_manager import ThemeManager
 
 
-class ColorPicker(QWidget):
+class ColorPicker(QDialog):
     """
     自定义颜色选择器组件
     """
 
-    saved = Signal()
-
     def __init__(self):
         super().__init__()
+
+        # 设置窗口属性
         self.setWindowTitle(LocaleManager().get("color_picker"))
+        self.setModal(True)
         self.base_theme = None
 
         # 初始化UI
@@ -58,7 +59,6 @@ class ColorPicker(QWidget):
             ThemeManager().get("selection-hover"),
             ThemeManager().get("theme-text"),
         ]
-        self.color_labels = []
         self.selected_index = 0
 
         # 右侧颜色槽布局
@@ -71,7 +71,6 @@ class ColorPicker(QWidget):
         self.primary_color_frame.setFrameShape(QFrame.StyledPanel)
         self.primary_color_frame.setCursor(Qt.PointingHandCursor)
         self.primary_color_frame.mousePressEvent = lambda _: self._select_slot(0)
-        self.color_labels.append(self.primary_color_frame)
         self.slot_layout.addWidget(self.primary_color_label)
         self.slot_layout.addWidget(self.primary_color_frame)
 
@@ -82,7 +81,6 @@ class ColorPicker(QWidget):
         self.secondary_color_frame.setFrameShape(QFrame.StyledPanel)
         self.secondary_color_frame.setCursor(Qt.PointingHandCursor)
         self.secondary_color_frame.mousePressEvent = lambda _: self._select_slot(1)
-        self.color_labels.append(self.secondary_color_frame)
         self.slot_layout.addWidget(self.secondary_color_label)
         self.slot_layout.addWidget(self.secondary_color_frame)
 
@@ -93,7 +91,6 @@ class ColorPicker(QWidget):
         self.text_color_frame.setFrameShape(QFrame.StyledPanel)
         self.text_color_frame.setCursor(Qt.PointingHandCursor)
         self.text_color_frame.mousePressEvent = lambda _: self._select_slot(2)
-        self.color_labels.append(self.text_color_frame)
         self.slot_layout.addWidget(self.text_color_label)
         self.slot_layout.addWidget(self.text_color_frame)
 
@@ -116,7 +113,7 @@ class ColorPicker(QWidget):
         self.slot_layout.addItem(spacer)
         self.save_button = QPushButton(LocaleManager().get("save"))
         self.save_button.setFixedSize(120, 50)
-        self.save_button.clicked.connect(self.saved.emit)
+        self.save_button.clicked.connect(self._on_save_button_click)
         self.slot_layout.addWidget(self.save_button)
 
         content_layout.addLayout(self.slot_layout, 1)
@@ -136,6 +133,17 @@ class ColorPicker(QWidget):
             return
         self.colors[self.selected_index] = color.name()
         self._set_style_sheet()
+
+    def _on_save_button_click(self):
+        """将颜色存入主题管理器并退出"""
+        theme_color, theme_color_alt, theme_text = self.colors
+        ThemeManager().set_custom_theme(
+            theme_color,
+            theme_color_alt,
+            theme_text,
+            self.theme_combo.currentData(),
+        )
+        self.accept()
 
     def _set_style_sheet(self):
         """设置/刷新所有UI组件样式"""

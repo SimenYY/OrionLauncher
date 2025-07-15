@@ -93,7 +93,6 @@ class SettingsPage(QWidget):
 
         # 创建保存按钮
         self.save_button = QPushButton("保存")
-        self.save_button.clicked.connect(self._on_save_button_click)
         button_layout.addWidget(self.save_button)
 
         main_layout.addLayout(button_layout)
@@ -103,11 +102,6 @@ class SettingsPage(QWidget):
 
         # 添加UI文字
         self._set_text()
-
-    def _on_save_button_click(self):
-        # 处理主题切换
-        ThemeManager().set_theme(self.theme_combo.currentData())
-        LocaleManager().set_locale(self.language_combo.currentData())
 
     def _create_game_tab(self) -> QWidget:
         """
@@ -730,18 +724,7 @@ class SettingsPage(QWidget):
             return
         self.color_picker = ColorPicker()
         self.color_picker.setFixedSize(750, 400)
-        self.color_picker.show()
-        self.color_picker.saved.connect(self._close_custom_color_picker)
-
-    def _close_custom_color_picker(self):
-        theme_color, theme_color_alt, theme_text = self.color_picker.colors
-        ThemeManager().set_custom_theme(
-            theme_color,
-            theme_color_alt,
-            theme_text,
-            self.color_picker.theme_combo.currentData(),
-        )
-        self.color_picker.close()
+        self.color_picker.exec()
 
     def _connect_signals(self):
         """连接信号槽"""
@@ -878,6 +861,10 @@ class SettingsPage(QWidget):
 
         # 保存设置
         self.settings_controller.save_settings()
+
+        # 处理主题，语言切换
+        ThemeManager().set_theme(self.theme_combo.currentData())
+        LocaleManager().set_locale(self.language_combo.currentData())
 
     @Slot()
     def _handle_settings_saved(self):

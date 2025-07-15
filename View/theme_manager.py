@@ -162,6 +162,8 @@ class ThemeManager(QObject):
         self.initialized = True
         # 默认使用绿色主题
         self.current_color_palette = GreenThemePalette()
+        # 自定义颜色主题
+        self.current_custom_color_palette = None
 
     def set_palette(self, palette):
         if not isinstance(palette, ColorPalette):
@@ -175,14 +177,16 @@ class ThemeManager(QObject):
             case "dark":
                 self.set_palette(GreenThemePalette())
             case "custom":
-                pass
+                if self.current_custom_color_palette is not None:
+                    self.set_palette(self.current_custom_color_palette)
             case _:
                 self.set_palette(BlueThemePalette())
         self.updated.emit()
 
     def set_custom_theme(self, theme_color, theme_color_alt, theme_text, base_theme):
+        """将调色板的颜色暂存入自定义颜色主题"""
         background_opacity = 0.5 if base_theme == "light" else 0
-        self.current_color_palette = ColorPalette(
+        self.current_custom_color_palette = ColorPalette(
             theme_color=theme_color,
             theme_color_alt=theme_color_alt,
             theme_text=theme_text,
