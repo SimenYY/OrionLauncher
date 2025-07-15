@@ -212,6 +212,7 @@ class SettingsPage(QWidget):
         # 语言
         self.language_combo = QComboBox()
         self.language_combo.addItem("简体中文", "zh_CN")
+        self.language_combo.addItem("繁體中文", "zh_TW")
         self.language_combo.addItem("English", "en_US")
         self.launcher_layout.addRow("语言:", self.language_combo)
 
