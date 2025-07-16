@@ -2,7 +2,10 @@ import logging
 import os
 import sys
 
+import appdirs
+
 from Core.Repository import path
+from Core.Repository.Config import Constant
 
 
 # 随 Nuitka/Pyinstaller 静态打包进可执行文件的资源文件释放的临时目录
@@ -17,6 +20,9 @@ else:
 path.set("exe_path", os.path.dirname(os.path.abspath(sys.argv[0])))
 # 当前工作目录
 path.set("cwd_path", os.getcwd())
+
+# 用户数据目录
+path.set("data_path", appdirs.user_data_dir(Constant.name))
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

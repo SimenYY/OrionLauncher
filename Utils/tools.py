@@ -1,17 +1,13 @@
 """
 通用工具模块
 
-本模块提供各种通用的工具函数和辅助功能，包括：
-
-- 空回调函数
-- 调试工具
-- 其他通用辅助函数
-
-这些工具函数旨在提高代码的可重用性和开发效率。
+本模块提供各种通用的工具函数和辅助功能
 """
 
 import logging
 import traceback
+import hashlib
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -51,3 +47,19 @@ def empty(*args, **kwargs) -> None:
             f"    with {caller.line}"
         )
     return None
+
+def uuid_generate(username: str) -> str:
+    """
+    生成离线模式下的 UUID
+
+    根据用户名生成一个离线模式下的 UUID，使用 MD5 哈希算法
+
+    参数:
+        username (str): 玩家用户名
+
+    返回:
+        uuid.UUID: 生成的 UUID 对象
+    """
+    string_to_hash: str = "OfflinePlayer:" + username
+    md5_hash: bytes = hashlib.md5(string_to_hash.encode("utf-8")).digest()
+    return uuid.UUID(bytes=md5_hash, version=3)

@@ -1,6 +1,8 @@
-from typing import Dict, Any, Callable, Protocol, Literal, overload
+from typing import Dict, Any, Callable, Protocol, Literal, overload, List
 import logging
 import traceback
+
+from Utils.types import ProcessLog
 
 logger = logging.getLogger(__name__)
 
@@ -130,8 +132,8 @@ class IAccountLogin(Protocol):
         """登录开始信号"""
     def authenticating(self):
         """正在进行身份验证"""
-    def waiting_user_input(self, message: str):
-        """等待用户输入（如验证码、授权等）"""
+    def device_code(self, code: str):
+        """设备代码，等待用户输入"""
     def progress(self, step: str, current: int, total: int):
         """登录进度，step为当前步骤描述"""
     def success(self, username: str, uuid: str, access_token: str):
@@ -140,6 +142,18 @@ class IAccountLogin(Protocol):
         """登录流程完成信号"""
     def error(self, error: Exception):
         """登录错误信号，传递错误"""
+
+
+class IOfflineAccountAdd(Protocol):
+    """
+    离线账号添加信号
+    """
+    def start(self):
+        """添加开始信号"""
+    def finished(self):
+        """添加完成信号"""
+    def error(self, error: Exception):
+        """添加错误信号，传递错误"""
 
 
 class IAccountRefresh(Protocol):
@@ -194,6 +208,17 @@ class IAccountValidation(Protocol):
         """验证完成信号"""
     def error(self, error: Exception):
         """验证错误信号，传递错误"""
+
+class ClientProcess(Protocol):
+    """
+    游戏客户端进程信号
+    """
+    def start(self):
+        """进程开始信号"""
+    def finished(self, exit_code: int, logs: List[ProcessLog]):
+        """进程结束信号"""
+    def error(self, error: Exception):
+        """进程启动错误信号"""
 
 
 class InstallationCallbackGroup(CallbackGroup):
@@ -277,3 +302,4 @@ class AccountCallbackGroup(CallbackGroup):
 
     def __getattr__(self, name: str) -> Any:
         return super().__getattr__(name)
+    
