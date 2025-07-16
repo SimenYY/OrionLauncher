@@ -61,7 +61,7 @@ class Database:
         except sqlite3.Error as e:
             raise WrappedSystemException(e, f"Failed to add user {id}: {e}")
 
-    def user_get(self, **kwargs) -> dict:
+    def user_get(self, **kwargs) -> UserInfo:
         """
         根据提供的参数查询用户数据
 
@@ -119,7 +119,7 @@ class Database:
         except sqlite3.Error as e:
             raise WrappedSystemException(e, f"Failed to query user data: {e}")
 
-    def user_get_all(self) -> list:
+    def user_get_all(self) -> list[UserInfo]:
         """
         获取所有用户数据
 
