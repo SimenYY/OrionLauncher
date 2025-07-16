@@ -19,4 +19,4 @@ class UserInfo(TypedDict):
 class ProcessLog(TypedDict):
     level: str
     message: str
-    timestamp: int
+    timestamp: float
