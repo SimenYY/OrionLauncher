@@ -1,6 +1,8 @@
-from typing import Dict, Any, Callable, Protocol, Literal, overload
+from typing import Dict, Any, Callable, Protocol, Literal, overload, List
 import logging
 import traceback
+
+from Utils.types import ProcessLog
 
 logger = logging.getLogger(__name__)
 
@@ -207,6 +209,17 @@ class IAccountValidation(Protocol):
     def error(self, error: Exception):
         """验证错误信号，传递错误"""
 
+class ClientProcess(Protocol):
+    """
+    游戏客户端进程信号
+    """
+    def start(self):
+        """进程开始信号"""
+    def finished(self, exit_code: int, logs: List[ProcessLog]):
+        """进程结束信号"""
+    def error(self, error: Exception):
+        """进程启动错误信号"""
+
 
 class InstallationCallbackGroup(CallbackGroup):
     """
@@ -289,3 +302,4 @@ class AccountCallbackGroup(CallbackGroup):
 
     def __getattr__(self, name: str) -> Any:
         return super().__getattr__(name)
+    
