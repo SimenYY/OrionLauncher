@@ -26,6 +26,8 @@ from PySide6.QtCore import Slot
 from Controller import SettingsController
 
 from Utils.locale_manager import LocaleManager
+
+from .color_picker import ColorPicker
 from .theme_manager import ThemeManager
 
 
@@ -91,7 +93,6 @@ class SettingsPage(QWidget):
 
         # 创建保存按钮
         self.save_button = QPushButton("保存")
-        self.save_button.clicked.connect(self._on_save_button_click)
         button_layout.addWidget(self.save_button)
 
         main_layout.addLayout(button_layout)
@@ -101,11 +102,6 @@ class SettingsPage(QWidget):
 
         # 添加UI文字
         self._set_text()
-
-    def _on_save_button_click(self):
-        # 处理主题切换
-        ThemeManager().setTheme(self.theme_combo.currentData())
-        LocaleManager().set_locale(self.language_combo.currentData())
 
     def _create_game_tab(self) -> QWidget:
         """
@@ -212,24 +208,25 @@ class SettingsPage(QWidget):
         # 语言
         self.language_combo = QComboBox()
         self.language_combo.addItem("简体中文", "zh_CN")
+        self.language_combo.addItem("繁體中文", "zh_TW")
         self.language_combo.addItem("English", "en_US")
         self.launcher_layout.addRow("语言:", self.language_combo)
 
         # 主题
         self.theme_combo = QComboBox()
-
-        # 当前主题色放置于最顶端
-        match ThemeManager().get_base_theme():
-            case "dark":
-                self.theme_combo.addItem("深色", "dark")
-                self.theme_combo.addItem("浅色", "light")
-            case "light":
-                self.theme_combo.addItem("浅色", "light")
-                self.theme_combo.addItem("深色", "dark")
-            case _:
-                self.theme_combo.addItem("深色", "dark")
-                self.theme_combo.addItem("浅色", "light")
+        self.theme_combo.addItem("深色", "dark")
+        self.theme_combo.addItem("浅色", "light")
+        self.theme_combo.addItem("自定义", "custom")
         self.launcher_layout.addRow("主题:", self.theme_combo)
+        self.theme_combo.activated.connect(self._start_custom_color_picker)
+
+        # 背景路径
+        self.background_layout = QHBoxLayout()
+        self.background_path_edit = QLineEdit()
+        self.background_path_button = QPushButton("浏览...")
+        self.background_layout.addWidget(self.background_path_edit)
+        self.background_layout.addWidget(self.background_path_button)
+        self.launcher_layout.addRow("背景路径:", self.background_layout)
 
         # 检查更新
         self.check_updates_check = QCheckBox()
@@ -552,6 +549,32 @@ class SettingsPage(QWidget):
         """
         )
 
+        self.background_path_edit.setStyleSheet(
+            f"""
+            QLineEdit {{
+                background-color: {ThemeManager().get("indicator-background")};
+                color: {ThemeManager().get("text")};
+                border: 1px solid {ThemeManager().get("border")};
+                border-radius: 4px;
+                padding: 8px;
+            }}
+        """
+        )
+
+        self.background_path_button.setStyleSheet(
+            f"""
+            QPushButton {{
+                background-color: {ThemeManager().get("neutral-selection-background")};
+                color: {ThemeManager().get("text")};
+                border-radius: 4px;
+                padding: 8px;
+            }}
+            QPushButton:hover {{
+                background-color: {ThemeManager().get("neutral-selection-hover")};
+            }}
+        """
+        )
+
         self.check_updates_check.setStyleSheet(
             f"""
             QCheckBox {{
@@ -705,9 +728,13 @@ class SettingsPage(QWidget):
             )
         self.launcher_layout.itemAt(2).widget().setText(LocaleManager().get("theme"))
         self.launcher_layout.itemAt(4).widget().setText(
+            LocaleManager().get("background_paths")
+        )
+        self.background_path_button.setText(LocaleManager().get("browse"))
+        self.launcher_layout.itemAt(6).widget().setText(
             LocaleManager().get("check_for_updates")
         )
-        self.launcher_layout.itemAt(6).widget().setText(
+        self.launcher_layout.itemAt(8).widget().setText(
             LocaleManager().get("close_launcher_when_game_starts")
         )
 
@@ -730,6 +757,13 @@ class SettingsPage(QWidget):
             LocaleManager().get("download_library_files")
         )
 
+    def _start_custom_color_picker(self, index):
+        if self.theme_combo.itemData(index) != "custom":
+            return
+        self.color_picker = ColorPicker()
+        self.color_picker.setFixedSize(750, 400)
+        self.color_picker.exec()
+
     def _connect_signals(self):
         """连接信号槽"""
         # 设置控制器信号
@@ -740,6 +774,9 @@ class SettingsPage(QWidget):
         self.save_button.clicked.connect(self._handle_save_clicked)
         self.minecraft_dir_button.clicked.connect(self._handle_minecraft_dir_clicked)
         self.java_path_button.clicked.connect(self._handle_java_path_clicked)
+        self.background_path_button.clicked.connect(
+            self._handle_background_path_clicked
+        )
 
         # 加载设置
         self.settings_controller.load_settings()
@@ -774,11 +811,23 @@ class SettingsPage(QWidget):
         index = self.language_combo.findData(language)
         if index >= 0:
             self.language_combo.setCurrentIndex(index)
+            LocaleManager().set_locale(index)
 
         theme = launcher_settings.get("theme", "dark")
         index = self.theme_combo.findData(theme)
         if index >= 0:
             self.theme_combo.setCurrentIndex(index)
+            if theme == "custom":
+                theme_colors = launcher_settings.get("theme_colors", {})
+                ThemeManager().set_custom_theme(
+                    theme_colors.get("theme_color", "#66ccff"),
+                    theme_colors.get("theme_color_alt", "#26aaec"),
+                    theme_colors.get("theme_text", "white"),
+                    self.theme_combo.currentData(),
+                )
+            ThemeManager().set_theme(theme)
+
+        self.background_path_edit.setText(game_settings.get("background_path", ""))
 
         self.check_updates_check.setChecked(
             launcher_settings.get("check_updates", True)
@@ -838,6 +887,12 @@ class SettingsPage(QWidget):
             "launcher", "theme", self.theme_combo.currentData()
         )
         self.settings_controller.set_setting(
+            "launcher", "theme_colors", ThemeManager().get_colors()
+        )
+        self.settings_controller.set_setting(
+            "launcher", "background_path", self.background_path_edit.text()
+        )
+        self.settings_controller.set_setting(
             "launcher", "check_updates", self.check_updates_check.isChecked()
         )
         self.settings_controller.set_setting(
@@ -845,6 +900,9 @@ class SettingsPage(QWidget):
             "close_launcher_when_game_starts",
             self.close_launcher_check.isChecked(),
         )
+        # 处理主题，语言切换
+        ThemeManager().set_theme(self.theme_combo.currentData())
+        LocaleManager().set_locale(self.language_combo.currentData())
 
         # 下载设置
         self.settings_controller.set_setting(
@@ -891,3 +949,13 @@ class SettingsPage(QWidget):
         )
         if file_path:
             self.java_path_edit.setText(file_path)
+
+    @Slot()
+    def _handle_background_path_clicked(self):
+        """处理背景路径按钮点击事件"""
+        file_filter = "图片文件 (*.png *.jpg *.jpeg)"
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "选择图片文件", "", file_filter
+        )
+        if file_path:
+            self.background_path_edit.setText(file_path)

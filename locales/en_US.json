@@ -52,5 +52,12 @@
   "user_login": "User Login",
   "processing": "Processing...",
   "username_password_empty_error": "Username or password cannot be empty",
-  "version_id_username_empty_error": "Version ID and username cannot be empty"
+  "version_id_username_empty_error": "Version ID and username cannot be empty",
+  "custom": "custom",
+  "color_picker": "Color Picker",
+  "primary_color": "Primary Color",
+  "secondary_color": "Secondary Color",
+  "text_color": "Theme Text Color",
+  "base_theme": "Base Theme",
+  "background_paths": "Background image"
 }

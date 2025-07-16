@@ -199,7 +199,7 @@ class InstallationsPage(QWidget):
             f"""
             QPushButton {{
                 background-color: {ThemeManager().get("selection-background")};
-                color: {ThemeManager().get("theme_text")};
+                color: {ThemeManager().get("theme-text")};
                 border-radius: 4px;
                 padding: 8px;
                 font-size: 14px;
