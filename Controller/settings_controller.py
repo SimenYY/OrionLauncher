@@ -38,6 +38,8 @@ class SettingsController(BaseController):
             "launcher": {
                 "language": "zh_CN",
                 "theme": "dark",
+                "theme_colors": {},
+                "background_path": "",
                 "check_updates": True,
                 "close_launcher_when_game_starts": True,
             },
