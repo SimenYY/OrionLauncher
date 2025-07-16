@@ -58,5 +58,6 @@
   "primary_color": "主題色",
   "secondary_color": "次主題色",
   "text_color": "文字主題色",
-  "base_theme": "基礎主題"
+  "base_theme": "基礎主題",
+  "background_paths": "背景圖"
 }

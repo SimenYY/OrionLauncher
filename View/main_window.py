@@ -61,12 +61,14 @@ class MainWindow(QMainWindow):
         # 连接信号槽
         self._connect_signals()
 
-    def _set_background(self):
+    def _set_background(self, bg_path=""):
         """设置背景图片"""
-        # 获取背景图片路径
-        bg_path = os.path.join(path.get("base_path"), "src", "image", "background.png")
-        bg_path = bg_path.replace("\\", "/")  # 转换路径分隔符
-
+        if not os.path.exists(bg_path):
+            # 获取默认背景图片路径
+            bg_path = os.path.join(
+                path.get("base_path"), "src", "image", "background.png"
+            )
+            bg_path = bg_path.replace("\\", "/")  # 转换路径分隔符
         if os.path.exists(bg_path):
             # 创建背景标签
             self.bg_label = QLabel(self)
@@ -87,6 +89,22 @@ class MainWindow(QMainWindow):
 
                 # 使用CSS设置纯色背景作为备选
                 self.setStyleSheet("QMainWindow { background-color: #1E1E1E; }")
+
+    def set_background(self):
+        """更换背景图片"""
+        bg_path = self.settings_page.background_path_edit.text()
+        bg_path = bg_path.replace("\\", "/")  # 转换路径分隔符
+        if not os.path.exists(bg_path):
+            return
+
+        # 加载背景图片
+        bg_pixmap = QPixmap(bg_path)
+        if bg_pixmap.isNull():
+            return
+        self.bg_pixmap = bg_pixmap
+
+        # 设置初始大小
+        self._update_background_size()
 
     def _update_background_size(self):
         """更新背景图片大小"""
@@ -337,6 +355,12 @@ class MainWindow(QMainWindow):
 
         # 语言刷新信号
         LocaleManager().updated.connect(self._set_text)
+
+        # 背景图刷新信号
+        self.settings_controller.settings_loaded.connect(self.set_background)
+        self.settings_page.settings_controller.settings_saved.connect(
+            self.set_background
+        )
 
     def resizeEvent(self, event):
         """
