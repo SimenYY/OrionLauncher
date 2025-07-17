@@ -83,13 +83,13 @@ jobs:
         with:
           python-version: 3.12
 
-      - name: Get release name from setuptools-scm
+      - name: Get release name from _version.py
         id: version_info
         run: |
-          python -m pip install setuptools-scm[toml]
-          VERSION=$(python -m setuptools_scm)
+          # 从 _version.py 文件读取版本信息
+          VERSION=$(python -c "import _version; print(_version.__version__)")
 
-          # 判断是否为正式版本（setuptools-scm生成的纯数字版本号）
+          # 判断是否为正式版本（不包含dev、rc、alpha、beta等标识）
           if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
             echo "release_name=Release-v$VERSION" >> $GITHUB_OUTPUT
             echo "prerelease=false" >> $GITHUB_OUTPUT
@@ -97,6 +97,8 @@ jobs:
             echo "release_name=Pre-Release-v$VERSION" >> $GITHUB_OUTPUT
             echo "prerelease=true" >> $GITHUB_OUTPUT
           fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
