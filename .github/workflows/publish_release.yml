@@ -69,8 +69,11 @@ jobs:
             -w /workspace \
             hisatri/python-env:ubuntu-22.04-0.1.0 \
             bash -c "
-              python3.12 -m uv pip install --system -e '.[dev]' &&
-              python3.12 build.py -n ${{ env.base_name }}
+              python3.12 -m venv /tmp/venv &&
+              source /tmp/venv/bin/activate &&
+              python -m pip install -U pip uv pyinstaller &&
+              uv pip install -e '.[dev]' &&
+              python build.py -n ${{ env.base_name }}
             "
 
       - name: Set up Python (Native)
