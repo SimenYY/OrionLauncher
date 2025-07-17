@@ -17,6 +17,7 @@ jobs:
             arch: x86_64
             python_arch: x64
             python_version: '3.12'
+            use_docker: false
 
           # Linux x86_64
           - os_name: linux
@@ -24,6 +25,7 @@ jobs:
             arch: x86_64
             python_arch: x64
             python_version: '3.12'
+            use_docker: false
 
           # Linux aarch64 (ARM64)
           - os_name: linux
@@ -31,27 +33,18 @@ jobs:
             arch: aarch64
             python_arch: arm64
             python_version: '3.12'
+            use_docker: true
 
     runs-on: ${{ matrix.os_runner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up QEMU for cross-compilation
-        if: ${{ matrix.arch == 'aarch64' && matrix.os_name == 'linux' }}
+      - name: Set up QEMU for ARM64
+        if: ${{ matrix.use_docker }}
         uses: docker/setup-qemu-action@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python_version }}
-          architecture: ${{ matrix.python_arch }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install -U pip uv pyinstaller
-          uv pip install --system -e ".[dev]"
-
+          platforms: arm64
 
       - name: Set dynamic artifact name
         id: set_name
@@ -68,7 +61,36 @@ jobs:
           echo "base_name=$BASE_NAME" >> $GITHUB_ENV
           echo "artifact_path=$ARTIFACT_PATH" >> $GITHUB_ENV
 
-      - name: Run PyInstaller
+      - name: Build with Docker (ARM64)
+        if: ${{ matrix.use_docker }}
+        run: |
+          docker run --rm --platform linux/arm64 \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            python:3.12-slim \
+            bash -c "
+              apt-get update && apt-get install -y build-essential &&
+              python -m pip install -U pip uv pyinstaller &&
+              uv pip install --system -e '.[dev]' &&
+              python build.py -n ${{ env.base_name }}
+            "
+
+      - name: Set up Python (Native)
+        if: ${{ !matrix.use_docker }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python_version }}
+          architecture: ${{ matrix.python_arch }}
+
+      - name: Install dependencies (Native)
+        if: ${{ !matrix.use_docker }}
+        run: |
+          python -m pip install -U pip uv pyinstaller
+          uv pip install --system -e ".[dev]"
+
+
+      - name: Run PyInstaller (Native)
+        if: ${{ !matrix.use_docker }}
         run: python build.py -n "${{ env.base_name }}"
 
       - name: Upload artifacts
