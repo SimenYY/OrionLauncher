@@ -1,0 +1,124 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'    # 仅在推送 v* 标签时触发
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os_name }}-${{ matrix.arch }}
+    strategy:
+      matrix:
+        include:
+          # Windows x86_64
+          - os_name: windows
+            os_runner: windows-latest
+            arch: x86_64
+            python_arch: x64
+
+          # Linux x86_64
+          - os_name: linux
+            os_runner: ubuntu-latest
+            arch: x86_64
+            python_arch: x64
+
+          # Linux aarch64 (ARM64)
+          - os_name: linux
+            os_runner: ubuntu-latest
+            arch: aarch64
+            python_arch: aarch64
+
+    runs-on: ${{ matrix.os_runner }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU for cross-compilation
+        if: ${{ matrix.arch == 'aarch64' && matrix.os_name == 'linux' }}
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+          architecture: ${{ matrix.python_arch }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip uv pyinstaller
+          uv pip install -e ".[dev]"
+
+
+      - name: Set dynamic artifact name
+        id: set_name
+        shell: bash
+        run: |
+          APP_NAME="OrionLauncher"
+          BASE_NAME="$APP_NAME-${{ matrix.os_name }}-${{ matrix.arch }}"
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            ARTIFACT_PATH="dist/$BASE_NAME.exe"
+          else
+            ARTIFACT_PATH="dist/$BASE_NAME"
+          fi
+
+          echo "base_name=$BASE_NAME" >> $GITHUB_ENV
+          echo "artifact_path=$ARTIFACT_PATH" >> $GITHUB_ENV
+
+      - name: Run PyInstaller
+        run: python build.py -n "${{ env.base_name }}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.base_name }}
+          path: ${{ env.artifact_path }}
+
+  release:
+    name: Create GitHub Release
+    needs: build # 确保在所有 build 任务成功后运行
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 授予创建 Release 的权限
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Get release name from setuptools-scm
+        id: version_info
+        run: |
+          python -m pip install setuptools-scm[toml]
+          VERSION=$(python -m setuptools_scm)
+
+          # 判断是否为正式版本（setuptools-scm生成的纯数字版本号）
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "release_name=Release-v$VERSION" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          else
+            echo "release_name=Pre-Release-v$VERSION" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ steps.version_info.outputs.release_name }}
+          body: Auto-generated release for ${{ steps.version_info.outputs.release_name }}
+          prerelease: ${{ steps.version_info.outputs.prerelease }}
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
