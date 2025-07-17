@@ -1,4 +1,5 @@
 from Utils.abc import Repository
+import _version
 
 
 class Config(Repository):
@@ -28,6 +29,7 @@ class Constant(Repository):
     repository: str = "https://github.com/OrionLauncher/OrionLauncher"
     license: str = "GNU LGPL-2.1 license"
     license_url: str = "https://github.com/OrionLauncher/OrionLauncher/blob/main/LICENSE"
+    version: str = _version.__version__
 
 
 class Path(Repository):
