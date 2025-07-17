@@ -210,3 +210,4 @@ __marimo__/
 docs/
 /source/_build/
 .minecraft/
+_version.py
