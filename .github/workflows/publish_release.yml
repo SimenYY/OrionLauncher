@@ -16,18 +16,21 @@ jobs:
             os_runner: windows-latest
             arch: x86_64
             python_arch: x64
+            python_version: '3.12'
 
           # Linux x86_64
           - os_name: linux
             os_runner: ubuntu-latest
             arch: x86_64
             python_arch: x64
+            python_version: '3.12'
 
           # Linux aarch64 (ARM64)
           - os_name: linux
             os_runner: ubuntu-latest
             arch: aarch64
-            python_arch: aarch64
+            python_arch: arm64
+            python_version: '3.12'
 
     runs-on: ${{ matrix.os_runner }}
     steps:
@@ -41,13 +44,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.python_arch }}
 
       - name: Install dependencies
         run: |
           python -m pip install -U pip uv pyinstaller
-          uv pip install -e ".[dev]"
+          uv pip install --system -e ".[dev]"
 
 
       - name: Set dynamic artifact name
