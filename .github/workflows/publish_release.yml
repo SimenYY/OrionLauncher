@@ -67,12 +67,10 @@ jobs:
           docker run --rm --platform linux/arm64 \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
-            python:3.12-slim \
+            hisatri/python-env:ubuntu-22.04-0.1.0 \
             bash -c "
-              apt-get update && apt-get install -y build-essential &&
-              python -m pip install -U pip uv pyinstaller &&
-              uv pip install --system -e '.[dev]' &&
-              python build.py -n ${{ env.base_name }}
+              python3.12 -m uv pip install --system -e '.[dev]' &&
+              python3.12 build.py -n ${{ env.base_name }}
             "
 
       - name: Set up Python (Native)
