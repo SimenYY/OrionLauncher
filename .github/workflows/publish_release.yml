@@ -40,6 +40,7 @@ jobs:
         run: |
           python -m pip install -U pip uv pyinstaller
           uv pip install --system -e ".[dev]"
+          python -c "import setuptools_scm; setuptools_scm.get_version(write_to='_version.py')"
 
       - name: Set dynamic artifact name
         id: set_name
