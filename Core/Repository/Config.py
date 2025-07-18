@@ -1,26 +1,44 @@
+import os
 from Utils.abc import Repository
+from Utils.path import data_path
+from Utils.database import Database
+
+from abc import ABC 
+from typing import Any, Dict
+
 import _version
 
 
 class Config(Repository):
     def __init__(self):
         super().__init__()
-        self["api.mirror"] = "Official"
-        self["api.proxy"] = ""
-        self["api.proxy.username"] = ""
-        self["api.proxy.password"] = ""
+        self.db_file = os.path.join(data_path, "config.db")
+        self.database = Database(self.db_file)  # 创建数据库实例，用于存储配置数据
+        self.update({
+            "api.mirror": "Official",
+            "api.proxy": "",
+            "api.proxy.username": "",
+            "api.proxy.password": ""
+        })
+        self._load()  # 加载数据库中的配置
 
     def _load(self):
-        """
-        TODO: 加载配置文件
-        """
-        pass
+        self.update(self.database.item_get_all())
 
     def _save(self):
-        """
-        TODO:保存配置文件
-        """
-        pass
+        self.database.item_sync(self)
+
+    def __getitem__(self, key: str) -> Any:
+        return super().get(key)
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        super().__setitem__(key, value)
+        self.database.item_set(key, value)
+
+    def __delitem__(self, key: str) -> None:
+        super().__delitem__(key)
+        self.database.item_delete(key)
+
 
 class Constant(Repository):
     """只读配置，用于存储一些固定不变的配置项"""
@@ -31,10 +49,4 @@ class Constant(Repository):
     license_url: str = "https://github.com/OrionLauncher/OrionLauncher/blob/main/LICENSE"
     version: str = _version.__version__
 
-
-class Path(Repository):
-    def __init__(self):
-        super().__init__()
-
-path = Path()
 config = Config()
