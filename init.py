@@ -4,8 +4,8 @@ import sys
 
 import appdirs
 
-from Core.Repository import path
-from Core.Repository.Config import Constant
+from src.core.Repository import path
+from src.core.Repository.Config import Constant
 
 
 # 随 Nuitka/Pyinstaller 静态打包进可执行文件的资源文件释放的临时目录
