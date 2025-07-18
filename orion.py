@@ -11,7 +11,6 @@ import sys
 
 from PySide6.QtCore import QLocale, QTranslator
 from PySide6.QtWidgets import QApplication
-from Utils import app_lock
 from View import MainWindow
 
 import init     # 导入 init.py 以初始化环境
