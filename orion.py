@@ -13,7 +13,6 @@ from PySide6.QtCore import QLocale, QTranslator
 from PySide6.QtWidgets import QApplication
 from View import MainWindow
 
-import init     # 导入 init.py 以初始化环境
 from Utils.app_lock import AppLock
 
 @AppLock.lock_this(name="OrionLauncher")

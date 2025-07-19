@@ -4,7 +4,13 @@
 负责应用设置的管理、保存、加载等功能
 """
 
+import os
+import platform
+import pickle
+import hashlib
+from pathlib import Path
 from typing import Dict, Any
+
 from PySide6.QtCore import Signal
 
 from .base_controller import BaseController
@@ -22,6 +28,10 @@ class SettingsController(BaseController):
     settings_saved = Signal()
     settings_changed = Signal(str, object)  # 设置项名称, 新值
 
+    # 配置文件位置
+    APP_NAME = "OrionLauncher"
+    FILE_NAME = "settings.pkl"
+
     def __init__(self, parent=None):
         """初始化设置控制器"""
         super().__init__(parent)
@@ -38,6 +48,8 @@ class SettingsController(BaseController):
             "launcher": {
                 "language": "zh_CN",
                 "theme": "dark",
+                "theme_colors": {},
+                "background_path": "",
                 "check_updates": True,
                 "close_launcher_when_game_starts": True,
             },
@@ -60,6 +72,26 @@ class SettingsController(BaseController):
         self.load_settings()
         return True
 
+    @staticmethod
+    def _get_user_config_path() -> Path:
+        """获取用户配置文件的完整路径（跨平台）"""
+        system = platform.system()
+        if system == "Windows":
+            base_dir = os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")
+        elif system == "Darwin":  # macOS
+            base_dir = Path.home() / "Library" / "Application Support"
+        else:  # Linux 或其他系统
+            base_dir = Path.home() / ".config"
+
+        config_dir = Path(base_dir) / SettingsController.APP_NAME
+        config_dir.mkdir(parents=True, exist_ok=True)
+        return config_dir / SettingsController.FILE_NAME
+
+    @staticmethod
+    def hash_data(data: bytes) -> str:
+        """使用 SHA-256 计算字节数据的哈希值"""
+        return hashlib.sha256(data).hexdigest()
+
     def load_settings(self) -> None:
         """加载设置"""
         # 异步加载设置
@@ -72,11 +104,25 @@ class SettingsController(BaseController):
         Returns:
             Dict[str, Any]: 设置数据
         """
-        # TODO: 从Core层加载设置
-        # 模拟加载设置
-        import time
+        # 加载配置，并验证哈希值是否匹配
+        config_path = SettingsController._get_user_config_path()
+        if config_path.exists():
+            try:
+                with open(config_path, "rb") as f:
+                    payload = pickle.load(f)  # 读取已保存的内容（包含 data 和 hash）
 
-        time.sleep(0.5)
+                data = payload.get("data")
+                expected_hash = payload.get("hash")
+
+                # 校验哈希是否匹配
+                if SettingsController.hash_data(data) == expected_hash:
+                    # 返回反序列化后的配置对象
+                    self._settings = pickle.loads(data)
+                else:
+                    print("配置文件已损坏")
+
+            except Exception as e:
+                print("加载配置失败:", e)
 
         # 发送设置加载信号
         self.settings_loaded.emit(self._settings)
@@ -94,11 +140,20 @@ class SettingsController(BaseController):
         Returns:
             bool: 保存是否成功
         """
-        # TODO: 调用Core层保存设置
-        # 模拟保存设置
-        import time
+        # 保存配置，并写入哈希值用于验证
+        config_path = SettingsController._get_user_config_path()
+        data = pickle.dumps(self._settings)
+        digest = self.hash_data(data)
 
-        time.sleep(0.5)
+        # 构建保存的内容：包含原始数据和哈希值
+        payload = {
+            "data": data,
+            "hash": digest,
+        }
+
+        # 保存文件，会自动覆盖旧文件（"wb" 写入二进制模式）
+        with open(config_path, "wb") as f:
+            pickle.dump(payload, f)
 
         # 发送设置保存信号
         self.settings_saved.emit()

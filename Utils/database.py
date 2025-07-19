@@ -19,6 +19,7 @@ class Database:
     def __init__(self, db_path):
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
+        self.create_tables()
 
     def create_tables(self):
         try:
@@ -229,4 +230,81 @@ class Database:
 
         except sqlite3.Error as e:
             raise WrappedSystemException(e, f"Failed to set item {key}: {e}")
+        
+    def item_get(self, key: str) -> str:
+        """
+        获取键对应的值
+
+        Args:
+            key: 键
+
+        Returns:
+            str: 值，如果键不存在则返回空字符串
+        """
+        try:
+            self.cursor.execute("SELECT value FROM ItemTable WHERE key = ?", (key,))
+            result = self.cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                return ""
+
+        except sqlite3.Error as e:
+            raise WrappedSystemException(e, f"Failed to get item {key}: {e}")
+        
+    def item_get_all(self) -> dict:
+        """
+        获取所有键值对
+
+        Returns:
+            dict: 所有键值对
+        """
+        try:
+            self.cursor.execute("SELECT * FROM ItemTable")
+            results = self.cursor.fetchall()
+            if results:
+                return dict(results)
+            else:
+                return {}
+
+        except sqlite3.Error as e:
+            raise WrappedSystemException(e, f"Failed to get all items: {e}")
+        
+    def item_sync(self, data: dict) -> bool:
+        """
+        同步键值对，删除不存在的键
+
+        Args:
+            data: 要同步的键值对
+
+        Returns:
+            bool: 同步是否成功
+        """
+        try:
+            self.cursor.execute("DELETE FROM ItemTable")
+            for key, value in data.items():
+                self.cursor.execute("INSERT INTO ItemTable (key, value) VALUES (?, ?)", (key, value))
+            self.conn.commit()
+            return True
+
+        except sqlite3.Error as e:
+            raise WrappedSystemException(e, f"Failed to sync items: {e}")
+        
+    def item_delete(self, key: str) -> bool:
+        """
+        删除键值对
+
+        Args:
+            key: 键
+
+        Returns:
+            bool: 删除是否成功
+        """
+        try:
+            self.cursor.execute("DELETE FROM ItemTable WHERE key = ?", (key,))
+            self.conn.commit()
+            return self.cursor.rowcount > 0
+
+        except sqlite3.Error as e:
+            raise WrappedSystemException(e, f"Failed to delete item {key}: {e}")
 

@@ -5,7 +5,8 @@
 
 from Utils.abc import Repository
 
-from .Config import config, path
+from .Config import config
+from .Path import path
 
 
 class Persistence(Repository):

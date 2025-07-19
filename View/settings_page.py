@@ -811,7 +811,7 @@ class SettingsPage(QWidget):
         index = self.language_combo.findData(language)
         if index >= 0:
             self.language_combo.setCurrentIndex(index)
-            LocaleManager().set_locale(index)
+            LocaleManager().set_locale(language)
 
         theme = launcher_settings.get("theme", "dark")
         index = self.theme_combo.findData(theme)
@@ -820,14 +820,14 @@ class SettingsPage(QWidget):
             if theme == "custom":
                 theme_colors = launcher_settings.get("theme_colors", {})
                 ThemeManager().set_custom_theme(
-                    theme_colors.get("theme_color", "#66ccff"),
-                    theme_colors.get("theme_color_alt", "#26aaec"),
-                    theme_colors.get("theme_text", "white"),
+                    theme_colors.get("selection-background", "#66ccff"),
+                    theme_colors.get("selection-hover", "#26aaec"),
+                    theme_colors.get("theme-text", "white"),
                     self.theme_combo.currentData(),
                 )
             ThemeManager().set_theme(theme)
 
-        self.background_path_edit.setText(game_settings.get("background_path", ""))
+        self.background_path_edit.setText(launcher_settings.get("background_path", ""))
 
         self.check_updates_check.setChecked(
             launcher_settings.get("check_updates", True)
