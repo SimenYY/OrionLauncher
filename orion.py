@@ -13,9 +13,6 @@ from PySide6.QtCore import QLocale, QTranslator
 from PySide6.QtWidgets import QApplication
 from View import MainWindow
 
-from Utils.app_lock import AppLock
-
-@AppLock.lock_this(name="OrionLauncher")
 def main():
     """主程序入口"""
     # 创建应用程序
